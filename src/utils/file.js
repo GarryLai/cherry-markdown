@@ -25,38 +25,18 @@ export function handleUpload(editor, type = 'image', accept = '*', callback = nu
   input.id = 'fileUpload';
   input.value = '';
   input.style.display = 'none';
-  input.accept = accept;
+  input.multiple = '1';
+  input.accept = type + '/*';
   // document.body.appendChild(input);
   input.addEventListener('change', (event) => {
     // @ts-ignore
     const [file] = event.target.files;
     // 文件上传后的回调函数可以由调用方自己实现
-    editor.options.fileUpload(file, (url, params = {}) => {
-      // 文件上传的默认回调行数，调用方可以完全不使用该函数
-      if (typeof url !== 'string' || !url) {
-        return;
-      }
-      if (callback) {
-        return callback(file.name, url, params);
-      }
-      let code = '';
-      if (type === 'image') {
-        // 如果是图片，则返回固定的图片markdown源码
-        code = `![${file.name}](${url})`;
-      } else if (type === 'video') {
-        // 如果是视频，则返回固定的视频markdown源码
-        code = `!video[${file.name}](${url})`;
-      } else if (type === 'audio') {
-        // 如果是音频，则返回固定的音频markdown源码
-        code = `!audio[${file.name}](${url})`;
-      } else {
-        // 默认返回超链接
-        code = `[${file.name}](${url})`;
-      }
-      // 替换选中区域
-      // @ts-ignore
-      editor.editor.doc.replaceSelection(code);
-    });
+
+		var files = event.target.files; // 檔案上傳后的回撥函式可以由呼叫方自己實現
+		uploadToImgur(files, insertImage, '貼文', type === 'audio');
+		
+		// HWDES: 此段刪除
   });
   input.click();
 }

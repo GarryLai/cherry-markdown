@@ -84,26 +84,23 @@ const sample = {
       '}',
     ].join('\n'),
   ),
-  pie: generateExample('PieChart', ['pie', 'title 饼图', '"A" : 100', '"B" : 80', '"C" : 40', '"D" : 30'].join('\n')),
-  gantt: generateExample(
-    'GanttChart',
-    [
-      'gantt',
-      '\ttitle 敏捷研发流程',
-      '\tsection 迭代前',
-      '\t\t交互设计     :a1, 2020-03-01, 4d',
-      '\t\tUI设计        :after a1, 5d',
-      '\t\t需求评审     : 1d',
-      '\tsection 迭代中',
-      '\t\t详细设计      :a2, 2020-03-11, 2d',
-      '\t\t开发          :2020-03-15, 7d',
-      '\t\t测试          :2020-03-22, 5d',
-      '\tsection 迭代后',
-      '\t\t发布: 1d',
-      '\t\t验收: 2d',
-      '\t\t回顾: 1d',
-    ].join('\n'),
-  ),
+  pie: generateExample('PieChart', ['pie', 'title 圓餅圖', '"A" : 100', '"B" : 80', '"C" : 40', '"D" : 30'].join('\n')),
+  gantt: generateExample('GanttChart',
+  [
+    'gantt',
+    '\ttitle 敏捷研發流程',
+    '\tsection 迭代前',
+    '\t\t互動設計     :a1, 2020-03-01, 4d',
+    '\t\tUI設計        :after a1, 5d',
+    '\t\t需求評審     : 1d',
+    '\tsection 迭代中',
+    '\t\t詳細設計      :a2, 2020-03-11, 2d',
+    '\t\t開發          :2020-03-15, 7d',
+    '\t\t測試          :2020-03-22, 5d',
+    '\tsection 迭代後', '\t\t發佈: 1d',
+    '\t\t驗收: 2d',
+    '\t\t回顧: 1d'
+  ].join('\n'))
 };
 
 /**

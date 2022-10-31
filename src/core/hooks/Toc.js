@@ -216,7 +216,7 @@ export default class Toc extends ParagraphBase {
   $makeToc(arr, dataSign, preLinesMatch) {
     const lines = calculateLinesOfParagraph(preLinesMatch, 1);
     let ret = `<dir class="${this.tocContainerClass}" data-sign="${dataSign}-${lines}" data-lines="${lines}">`;
-    ret += `<p class="${this.tocTitleClass}">目录</p>`;
+    ret += `<p class="${this.tocTitleClass}">目錄</p>`;
     if (arr.length <= 0) {
       return '';
     }
