@@ -49,7 +49,6 @@
     "commit": "./node_modules/cz-customizable/standalone.js",
     "release": "standard-version",
     "prepublishOnly": "yarn build",
-    "prepare": "husky install",
     "publish": "git push --follow-tags origin main && npm publish",
     "examples": "anywhere -p 3000 -s"
   },

@@ -1927,7 +1927,7 @@ div[data-type=codeBlock] .token.inserted {
   line-height: 27px;
   color: #3f4a56;
   background: #f8fafb;
-  box-shadow: 0 0 10px rgba(128, 145, 165, 0.2);
+  /*HWDES: 此段刪除*/
 }
 .cherry .ch-icon {
   vertical-align: middle;
@@ -1946,10 +1946,11 @@ div[data-type=codeBlock] .token.inserted {
 }
 .cherry.fullscreen {
   position: fixed;
-  top: 0;
+  top: 4rem;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: calc(100% - 4rem);
+  height: calc(100% - 4rem);
   z-index: 1000;
 }
 .cherry .no-select {
@@ -2413,7 +2414,7 @@ div[data-type=codeBlock] .token.inserted {
 
 .cherry-previewer {
   padding: 20px 34px;
-  border-left: 2px solid #ebedee;
+  /*HWDES: 此段刪除*/
   width: 50%;
   box-sizing: border-box;
   background-color: #f8fafb;

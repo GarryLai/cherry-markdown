@@ -19,88 +19,15 @@ function generateExample(title, mermaidCode) {
   return [title, '```mermaid', mermaidCode, '```'].join('\n');
 }
 
-const flowChartContent = [
-  '\tA[公司] -->| 下 班 | B(菜市场)',
-  '\tB --> C{看见<br>卖西瓜的}',
-  '\tC -->|Yes| D[买一个包子]',
-  '\tC -->|No| E[买一斤包子]',
-].join('\n');
+const flowChartContent = ['\tA[公司] -->| 下 班 | B(菜市場)', '\tB --> C{看見<br>賣西瓜的}', '\tC -->|Yes| D[買一個包子]', '\tC -->|No| E[買一斤包子]'].join('\n');
 
 const sample = {
-  flow: [
-    'FlowChart',
-    generateExample('左右结构', `graph LR\n${flowChartContent}`),
-    generateExample('上下结构', `graph TD\n${flowChartContent}`),
-  ].join('\n'),
-  sequence: generateExample(
-    'SequenceDiagram',
-    [
-      'sequenceDiagram',
-      'autonumber',
-      'A-->A: 文本1',
-      'A->>B: 文本2',
-      'loop 循环1',
-      'loop 循环2',
-      'A->B: 文本3',
-      'end',
-      'loop 循环3',
-      'B -->>A: 文本4',
-      'end',
-      'B -->> B: 文本5',
-      'end',
-    ].join('\n'),
-  ),
-  state: generateExample(
-    'StateDiagram',
-    [
-      'stateDiagram-v2',
-      '[*] --> A',
-      'A --> B',
-      'A --> C',
-      'state A {',
-      '  \t[*] --> D',
-      '  \tD --> [*]',
-      '}',
-      'B --> [*]',
-      'C --> [*]',
-    ].join('\n'),
-  ),
-  class: generateExample(
-    'ClassDiagram',
-    [
-      'classDiagram',
-      'Base <|-- One',
-      'Base <|-- Two',
-      'Base : +String name',
-      'Base: +getName()',
-      'Base: +setName(String name)',
-      'class One{',
-      '  \t+String newName',
-      '  \t+getNewName()',
-      '}',
-      'class Two{',
-      '  \t-int id',
-      '  \t-getId()',
-      '}',
-    ].join('\n'),
-  ),
+  flow: ['FlowChart', generateExample('左右結構', "graph LR\n".concat(flowChartContent)), generateExample('上下結構', "graph TD\n".concat(flowChartContent))].join('\n'),
+  sequence: generateExample('SequenceDiagram', ['sequenceDiagram', 'autonumber', 'A-->A: 文字1', 'A->>B: 文字2', 'loop 循環1', 'loop 循環2', 'A->B: 文字3', 'end', 'loop 循環3', 'B -->>A: 文字4', 'end', 'B -->> B: 文字5', 'end'].join('\n')),
+  state: generateExample('StateDiagram', ['stateDiagram-v2', '[*] --> A', 'A --> B', 'A --> C', 'state A {', '  \t[*] --> D', '  \tD --> [*]', '}', 'B --> [*]', 'C --> [*]'].join('\n')),
+  "class": generateExample('ClassDiagram', ['classDiagram', 'Base <|-- One', 'Base <|-- Two', 'Base : +String name', 'Base: +getName()', 'Base: +setName(String name)', 'class One{', '  \t+String newName', '  \t+getNewName()', '}', 'class Two{', '  \t-int id', '  \t-getId()', '}'].join('\n')),
   pie: generateExample('PieChart', ['pie', 'title 圓餅圖', '"A" : 100', '"B" : 80', '"C" : 40', '"D" : 30'].join('\n')),
-  gantt: generateExample('GanttChart',
-  [
-    'gantt',
-    '\ttitle 敏捷研發流程',
-    '\tsection 迭代前',
-    '\t\t互動設計     :a1, 2020-03-01, 4d',
-    '\t\tUI設計        :after a1, 5d',
-    '\t\t需求評審     : 1d',
-    '\tsection 迭代中',
-    '\t\t詳細設計      :a2, 2020-03-11, 2d',
-    '\t\t開發          :2020-03-15, 7d',
-    '\t\t測試          :2020-03-22, 5d',
-    '\tsection 迭代後', '\t\t發佈: 1d',
-    '\t\t驗收: 2d',
-    '\t\t回顧: 1d'
-  ].join('\n'))
+  gantt: generateExample('GanttChart', ['gantt', '\ttitle 敏捷研發流程', '\tsection 迭代前', '\t\t互動設計     :a1, 2020-03-01, 4d', '\t\tUI設計        :after a1, 5d', '\t\t需求評審     : 1d', '\tsection 迭代中', '\t\t詳細設計      :a2, 2020-03-11, 2d', '\t\t開發          :2020-03-15, 7d', '\t\t測試          :2020-03-22, 5d', '\tsection 迭代後', '\t\t發佈: 1d', '\t\t驗收: 2d', '\t\t回顧: 1d'].join('\n'))
 };
 
 /**
