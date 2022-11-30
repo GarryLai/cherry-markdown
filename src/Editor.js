@@ -157,7 +157,7 @@ export default class Editor {
         currentCursor.line = range[0].anchor.line;
         currentCursor.ch = range[0].anchor.ch;
         codemirrorDoc.replaceSelection(mdText);
-        pasteHelper.showSwitchBtnAfterPasteHtml(currentCursor, codemirror, htmlText, mdText);
+        pasteHelper.showSwitchBtnAfterPasteHtml(this.$cherry, currentCursor, codemirror, htmlText, mdText);
       } else {
         codemirrorDoc.replaceSelection(mdText);
       }
@@ -287,7 +287,7 @@ export default class Editor {
             if (fileType === '' || /^text/i.test(fileType)) {
               continue;
             }
-            this.options.fileUpload(file, (url, params) => {
+            this.options.fileUpload(file, (url, params = {}) => {
               if (typeof url !== 'string') {
                 return;
               }
