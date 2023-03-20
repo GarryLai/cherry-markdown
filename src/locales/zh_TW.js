@@ -57,5 +57,6 @@ export default {
     copy: '複製內容', // 複製內容
     "export": '匯出', // 導出PDF、長圖
     underline: '底線', // 下劃線
-    pinyin: '拼音' // 拼音
+    pinyin: '拼音', // 拼音
+	detail: '手風琴', // 手風琴
 };
