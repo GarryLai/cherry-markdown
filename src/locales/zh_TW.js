@@ -55,18 +55,18 @@ export default {
     settings: '設定', // 設定
     mobilePreview: '手機版預覽', // 移動端預覽
     copy: '複製內容', // 複製內容
-    "export": '匯出', // 導出PDF、長圖
+    "export": '匯出', // 匯出PDF、長圖
     underline: '底線', // 下劃線
     pinyin: '拼音', // 拼音
     file: '檔案',
     pastePlain: '貼上為純文字格式', // 貼上為純文字格式
     pasteMarkdown: '貼上為markdown格式', // 貼上為markdown格式
     hide: '隱藏(ctrl+0)', // 隱藏(ctrl+0)
-    exportToPdf: '導出PDF', // 導出PDF
-    exportScreenshot: '導出長圖', // 導出長圖
-    exportMarkdownFile: '導出markdown', // 導出markdown檔案
-    exportHTMLFile: '導出html', // 導出預覽區html檔案
-    theme: '主題', // 導出長圖
-    panel: '面板', // 導出長圖
+    exportToPdf: '匯出PDF', // 匯出PDF
+    exportScreenshot: '匯出長圖', // 匯出長圖
+    exportMarkdownFile: '匯出MD', // 匯出markdown檔案
+    exportHTMLFile: '匯出html', // 匯出預覽區html檔案
+    theme: '主題', // 匯出長圖
+    panel: '面板', // 匯出長圖
     detail: '手風琴', // 手風琴
 };
