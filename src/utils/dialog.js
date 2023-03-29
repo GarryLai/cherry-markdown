@@ -112,8 +112,8 @@ const dialog = {
       ].join(';'),
     });
 
-    this.headCloseButton.title = '关闭';
-    this.footSureButton.textContent = '确定';
+    this.headCloseButton.title = '關閉';
+    this.footSureButton.textContent = '確定';
 
     this.headTitle.textContent = title;
     this.head.appendChild(this.headTitle);
