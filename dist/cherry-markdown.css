@@ -2076,6 +2076,9 @@ div[data-type=codeBlock] .token.inserted {
   outline: 1px solid #3582fb;
   word-break: break-all;
 }
+.cherry .cherry-highlight-line {
+  background-color: #ffffcc;
+}
 
 @media print {
   img, figure, pre, table {
@@ -2540,6 +2543,16 @@ div[data-type=codeBlock] .token.inserted {
 }
 .cherry-editor .CodeMirror-lines {
   padding: 15px 34px;
+}
+.cherry-editor .CodeMirror-lines .drawio, .cherry-editor .CodeMirror-lines .base64 {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+  white-space: nowrap;
+  vertical-align: bottom;
+  color: darkmagenta !important;
+  font-size: 12px !important;
 }
 .cherry-editor .cm-s-default .cm-header {
   color: #3f4a56;
