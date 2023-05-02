@@ -157,6 +157,7 @@ var basicConfig = {
       'ul',
       'checklist',
       'panel',
+      'justify',
       'detail',
       '|',
       'formula',
@@ -173,8 +174,9 @@ var basicConfig = {
         customMenuBName: ['ruby', 'audio', 'video', 'customMenuAName'],
       },
       'customMenuCName',
-      'theme'
+      'theme',
     ],
+    toolbarRight: ['fullScreen', '|'],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
     sidebar: ['mobilePreview', 'copy', 'theme'],
     customMenu: {
@@ -195,6 +197,11 @@ var basicConfig = {
   //extensions: [],
   callback: {
     changeString2Pinyin: pinyin,
+  },
+  editor: {
+    id: 'cherry-text',
+    name: 'cherry-text',
+    autoSave2Textarea: true,
   }
 };
 

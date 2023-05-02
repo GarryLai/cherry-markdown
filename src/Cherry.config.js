@@ -191,6 +191,9 @@ const defaultConfig = {
     },
   },
   editor: {
+    id: 'code', // textarea 的id属性值
+    name: 'code', // textarea 的name属性值
+    autoSave2Textarea: false, // 是否自动将编辑区的内容回写到textarea里
     theme: 'default', // depend on codemirror theme name: https://codemirror.net/demo/theme.htm
     // 编辑器的高度，默认100%，如果挂载点存在内联设置的height则以内联样式为主
     height: '100%',
@@ -220,6 +223,7 @@ const defaultConfig = {
       '|',
       'list',
       'panel',
+      // 'justify', // 对齐方式，默认不推荐这么“复杂”的样式要求
       'detail',
       {
         insert: [
@@ -242,6 +246,7 @@ const defaultConfig = {
       'graph',
       'settings',
     ],
+    toolbarRight: [],
     sidebar: [],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'quickTable', 'code'], // array or false
