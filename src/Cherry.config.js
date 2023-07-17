@@ -211,6 +211,7 @@ const defaultConfig = {
       // 是否自动focus 默认为true
       autofocus: true,
     },
+    writingStyle: 'normal', // 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal
   },
   toolbars: {
     theme: 'dark', // light or dark
@@ -252,7 +253,7 @@ const defaultConfig = {
     toolbarRight: [],
     sidebar: [],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
-    float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'quickTable', 'code'], // array or false
+    float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'table', 'code'], // array or false
   },
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: '',
@@ -327,6 +328,7 @@ const defaultConfig = {
     { className: 'light', label: '明亮' },
     { className: 'green', label: '清新' },
     { className: 'red', label: '热情' },
+    { className: 'violet', label: '淡雅' },
   ],
   // 预览页面不需要绑定事件
   isPreviewOnly: false,

@@ -45,6 +45,26 @@
       min-height: 100%;
     }
   }
+
+  div[data-type="codeBlock"]:hover  {
+    position: relative;
+    .cherry-code-preview-lang-select{
+      display: block !important;
+      position: absolute;
+      transform: translate(2px, 50%);
+    }
+
+  }
+
+  .cherry-preview--full {
+    div[data-type="codeBlock"]:hover  {
+      position: unset;
+      .cherry-code-preview-lang-select{
+        display: none !important;
+        position: unset;
+      }
+    }
+  }
 }
 
 .cherry {
@@ -133,7 +153,7 @@
   //border: 1px solid $borderColor;
   box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5);
   margin-left: -60px;
-  z-index: 8;
+  z-index: 11;
 
   &-item {
     width: 100%;
@@ -283,7 +303,7 @@
   position: absolute;
   top: 48px;
   right: 7px;
-  z-index: 0;
+  z-index: 11;
   bottom: 0;
   overflow: hidden;
 
@@ -397,6 +417,44 @@
 
   &.cherry-editor--hidden {
     display: none;
+  }
+
+  &-writing-style {
+    &--focus {
+      &::before {
+        content: '';
+        display: block;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        background: linear-gradient(to bottom, #00000006, #00000033);
+        pointer-events: none;
+        z-index: 11;
+      }
+      &::after {
+        content: '';
+        display: block;
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        background: linear-gradient(to top, #00000006, #00000033);
+        pointer-events: none;
+        z-index: 11;
+      }
+    }
+    &--typewriter {
+      .CodeMirror-lines {
+        position: relative;
+        &::before {
+          content: '';
+          display: block;
+        }
+        &::after {
+          content: '';
+          display: block;
+        }
+      }
+    }
   }
 
   .CodeMirror {
@@ -563,6 +621,7 @@
     list-style: square;
   }
 
+
   div[data-type="codeBlock"]:hover {
     .cherry-copy-code-block {
       display: block !important;
@@ -657,9 +716,9 @@
   left: 0;
   top: 0;
   background: #fff;
-  border: 1px solid #ccc;
+  // border: 1px solid #ccc;
   border-radius: 2px;
-  max-height: 200px;
+  max-height: 500px;
   box-shadow: 0 2px 8px 1px #00000033;
 
   .cherry-suggester-panel__item {
@@ -675,6 +734,11 @@
       background-color: #f2f2f5;
       text-decoration: none;
       color: #eb7350;
+    }
+    & > i {
+      display: inline-block;
+      transform: translateY(2px);
+      margin-right: 8px;
     }
   }
 
@@ -694,3 +758,4 @@
 @import './themes/light.scss';
 @import './themes/green.scss';
 @import './themes/red.scss';
+@import './themes/violet.scss';

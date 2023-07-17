@@ -26,6 +26,30 @@ import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import { isBrowser } from '@/utils/env';
 
+/**
+ * @typedef {import('codemirror')} CodeMirror
+ */
+
+/**
+ * @typedef { Object } SuggestListItemObject 推荐列表项对象
+ * @property { string } icon 图标
+ * @property { string } label 候选列表回显的内容
+ * @property { string } value 点击候选项的时候回填的值
+ * @property { string } keyword 关键词，通过关键词控制候选项的显隐
+ * @typedef { SuggestListItemObject | string } SuggestListItem 推荐列表项
+ * @typedef { Array<SuggestListItem> } SuggestList 推荐列表
+ */
+
+/**
+ * @typedef {object} SuggesterConfigItem
+ * @property {function(string, function(SuggestList): void): void} suggestList
+ * @property {string} keyword
+ * @property {function} suggestListRender
+ * @property {function} echo
+ * @typedef {object} SuggesterConfig
+ * @property {Array<SuggesterConfigItem>} suggester
+ */
+
 export default class Suggester extends SyntaxBase {
   static HOOK_NAME = 'suggester';
 
@@ -50,17 +74,112 @@ export default class Suggester extends SyntaxBase {
 
     super({ needCache: true });
 
-    this.initConfig(config);
+    this.config = config;
     this.RULE = this.rule();
   }
 
+  afterInit(callback) {
+    if (typeof callback === 'function') {
+      callback();
+    }
+    this.initConfig(this.config);
+  }
+
+  /**
+   * 获取系统默认的候选项列表
+   * TODO：后面考虑增加层级机制，比如“公式”是一级，“集合、逻辑运算、方程式”是公式的二级候选值
+   */
+  getSystemSuggestList() {
+    const locales = this.$locale;
+    return [
+      {
+        icon: 'h1',
+        label: locales['H1 Heading'],
+        keyword: 'head1',
+        value: '# ',
+      },
+      {
+        icon: 'h2',
+        label: locales['H2 Heading'],
+        keyword: 'head2',
+        value: '## ',
+      },
+      {
+        icon: 'h3',
+        label: locales['H3 Heading'],
+        keyword: 'head3',
+        value: '### ',
+      },
+      {
+        icon: 'table',
+        label: locales.table,
+        keyword: 'table',
+        value: '| Header | Header | Header |\n| --- | --- | --- |\n| Content | Content | Content |\n',
+      },
+      {
+        icon: 'code',
+        label: locales.code,
+        keyword: 'code',
+        value: '```\n\n```\n',
+      },
+      {
+        icon: 'link',
+        label: locales.link,
+        keyword: 'link',
+        value: `[title](https://url)`,
+      },
+      {
+        icon: 'checklist',
+        label: locales.checklist,
+        keyword: 'checklist',
+        value: `- [ ] item\n- [x] item`,
+      },
+      {
+        icon: 'tips',
+        label: locales.panel,
+        keyword: 'panel tips info warning danger success',
+        value: `::: primary title\ncontent\n:::\n`,
+      },
+      {
+        icon: 'insertFlow',
+        label: locales.detail,
+        keyword: 'detail',
+        value: `+++ 点击展开更多\n内容\n++- 默认展开\n内容\n++ 默认收起\n内容\n+++\n`,
+      },
+    ];
+  }
+
+  /**
+   * 初始化配置
+   * @param {SuggesterConfig} config
+   */
   initConfig(config) {
-    const { suggester } = config;
+    let { suggester } = config;
 
     this.suggester = {};
     if (!suggester) {
-      return;
+      suggester = [];
     }
+    const systemSuggestList = this.getSystemSuggestList();
+    // 默认的唤醒关键字
+    suggester.unshift({
+      keyword: '/',
+      suggestList(word, callback) {
+        const $word = word.replace(/^\//, '');
+        // 加个空格就直接退出联想
+        if (/^\s$/.test($word)) {
+          callback(false);
+          return;
+        }
+        const keyword = $word.replace(/\s+/g, '').split('').join('.*?');
+        const test = new RegExp(`^.*?${keyword}.*?$`, 'i');
+        const suggestList = systemSuggestList.filter((item) => {
+          // TODO: 首次联想的时候会把所有的候选项列出来，后续可以增加一些机制改成默认拉取一部分候选项
+          return !$word || test.test(item.keyword);
+        });
+        callback(suggestList);
+      },
+    });
     suggester.forEach((configItem) => {
       if (!configItem.suggestList) {
         console.warn('[cherry-suggester]: the suggestList of config is missing.');
@@ -155,6 +274,10 @@ class SuggesterPanel {
     return !!this.editor && !!this.editor.editor.display && !!this.editor.editor.display.wrapper;
   }
 
+  /**
+   * 设置编辑器
+   * @param {import('@/Editor').default} editor
+   */
   setEditor(editor) {
     this.editor = editor;
   }
@@ -198,7 +321,7 @@ class SuggesterPanel {
               return res;
             }
             // logic to decide whether to move up or not
-            return Pass.toString();
+            // return Pass.toString();
           }
         };
       } else if (!extraKeys[key]) {
@@ -274,19 +397,50 @@ class SuggesterPanel {
     }
   }
 
-  updatePanel(items) {
-    let defaultValue = items.map((item, idx) => this.renderPanelItem(item, idx === 0)).join('');
-    if (this.suggesterConfig[this.keyword] && this.suggesterConfig[this.keyword].suggestListRender) {
-      defaultValue = this.suggesterConfig[this.keyword].suggestListRender.call(this, items) || defaultValue;
+  /**
+   * 更新suggesterPanel
+   * @param {SuggestList} suggestList
+   */
+  updatePanel(suggestList) {
+    let defaultValue = suggestList
+      .map((suggest, idx) => {
+        if (typeof suggest === 'object' && suggest !== null) {
+          let renderContent = suggest.label;
+          if (suggest?.icon) {
+            renderContent = `<i class="ch-icon ch-icon-${suggest.icon}"></i>${renderContent}`;
+          }
+          return this.renderPanelItem(renderContent, idx === 0);
+        }
+        return this.renderPanelItem(suggest, idx === 0);
+      })
+      .join('');
+    /**
+     * @type { SuggesterConfigItem }
+     */
+    const suggesterConfig = this.suggesterConfig[this.keyword];
+    // 用户自定义渲染逻辑 suggestListRender
+    if (suggesterConfig && typeof suggesterConfig.suggestListRender === 'function') {
+      defaultValue = suggesterConfig.suggestListRender.call(this, suggestList) || defaultValue;
     }
 
+    this.$suggesterPanel.innerHTML = ''; // 清空
     if (typeof defaultValue === 'string') {
       this.$suggesterPanel.innerHTML = defaultValue;
+    } else if (Array.isArray(defaultValue) && defaultValue.length > 0) {
+      defaultValue.forEach((item) => {
+        this.$suggesterPanel.appendChild(item);
+      });
     } else if (typeof defaultValue === 'object' && defaultValue.nodeType === 1) {
       this.$suggesterPanel.appendChild(defaultValue);
     }
   }
 
+  /**
+   * 渲染suggesterPanel item
+   * @param {string} item 渲染内容
+   * @param {boolean} selected 是否选中
+   * @returns {string} html
+   */
   renderPanelItem(item, selected) {
     if (selected) {
       return `<div class="cherry-suggester-panel__item cherry-suggester-panel__item--selected">${item}</div>`;
@@ -323,12 +477,27 @@ class SuggesterPanel {
     this.showsuggesterPanel({ left, top, items: this.optionList });
   }
 
+  /**
+   * 获取光标位置
+   * @param {CodeMirror} codemirror
+   * @returns {{ left: number, top: number }}
+   */
+  getCursorPos(codemirror) {
+    const $cursor = document.querySelector('.CodeMirror-cursors .CodeMirror-cursor');
+    if (!$cursor) return null;
+    const pos = codemirror.getCursor();
+    const lineHeight = codemirror.lineInfo(pos.line).handle.height;
+    const rect = $cursor.getBoundingClientRect();
+    const top = rect.top + lineHeight;
+    const { left } = rect;
+    return { left, top };
+  }
+
   // 开启关联
   startRelate(codemirror, keyword, from) {
     this.cursorFrom = from;
     this.keyword = keyword;
     this.searchCache = true;
-    this.searchKeyCache = [keyword];
     this.relocatePanel(codemirror);
   }
 
@@ -341,10 +510,15 @@ class SuggesterPanel {
     this.searchKeyCache = [];
     this.searchCache = false;
     this.cursorMove = true;
+    this.optionList = [];
   }
 
-  // 粘贴选择结果
-  pasteSelectResult(idx) {
+  /**
+   * 粘贴选择结果
+   * @param {number} idx 选择的结果索引
+   * @param {KeyboardEvent} evt 键盘事件
+   */
+  pasteSelectResult(idx, evt) {
     if (!this.cursorTo) {
       this.cursorTo = JSON.parse(JSON.stringify(this.cursorFrom));
     }
@@ -352,14 +526,30 @@ class SuggesterPanel {
       return;
     }
     this.cursorTo.ch += 1;
-
+    const { cursorFrom, cursorTo } = this; // 缓存光标位置
     if (this.optionList[idx]) {
-      const result = ` ${this.keyword}${this.optionList[idx]} `;
+      let result = '';
+      if (
+        typeof this.optionList[idx] === 'object' &&
+        this.optionList[idx] !== null &&
+        typeof this.optionList[idx].value === 'string'
+      ) {
+        result = this.optionList[idx].value;
+      }
+      if (typeof this.optionList[idx] === 'string') {
+        result = ` ${this.keyword}${this.optionList[idx]} `;
+      }
       // this.cursorTo.ch = this.cursorFrom.ch + result.length;
-      this.editor.editor.replaceRange(result, this.cursorFrom, this.cursorTo);
+      if (result) {
+        this.editor.editor.replaceRange(result, cursorFrom, cursorTo);
+      }
     }
   }
 
+  /**
+   * 寻找当前选中项的索引
+   * @returns {number}
+   */
   findSelectedItemIndex() {
     return Array.prototype.findIndex.call(this.$suggesterPanel.childNodes, (item) =>
       item.classList.contains('cherry-suggester-panel__item--selected'),
@@ -370,13 +560,21 @@ class SuggesterPanel {
     return this.searchCache;
   }
 
+  /**
+   *  codeMirror change事件
+   * @param {CodeMirror.Editor} codemirror
+   * @param {CodeMirror.EditorChange} evt
+   * @returns
+   */
   onCodeMirrorChange(codemirror, evt) {
     const { text, from, to, origin } = evt;
     const changeValue = text.length === 1 ? text[0] : '';
 
-    if (this.suggesterConfig[changeValue]) {
+    // 首次输入命中关键词的时候开启联想
+    if (!this.enableRelate() && this.suggesterConfig[changeValue]) {
       this.startRelate(codemirror, changeValue, from);
-    } else if (this.enableRelate() && (changeValue || origin === '+delete')) {
+    }
+    if (this.enableRelate() && (changeValue || origin === '+delete')) {
       this.cursorTo = to;
       if (changeValue) {
         this.searchKeyCache.push(changeValue);
@@ -387,20 +585,28 @@ class SuggesterPanel {
           return;
         }
       }
-
-      // 请求api
-      // 返回结果拼凑
-      this.suggesterConfig[this.keyword].suggestList(this.searchKeyCache.join(''), (res) => {
-        if (!res || !res.length) {
-          return;
-        }
-        this.optionList = res;
-        this.updatePanel(this.optionList);
-      });
+      // 展示推荐列表
+      if (typeof this.suggesterConfig[this.keyword]?.suggestList === 'function') {
+        // 请求api 返回结果拼凑
+        this.suggesterConfig[this.keyword].suggestList(this.searchKeyCache.join(''), (res) => {
+          // 如果返回了false，则强制退出联想
+          if (res === false) {
+            this.stopRelate();
+            return;
+          }
+          // 回显命中的结果
+          this.optionList = !res || !res.length ? [] : res;
+          this.updatePanel(this.optionList);
+        });
+      }
     }
   }
 
-  // 监听方向键选择 options
+  /**
+   * 监听方向键选择 options
+   * @param {CodeMirror.Editor} codemirror
+   * @param {KeyboardEvent} evt
+   */
   onKeyDown(codemirror, evt) {
     if (!this.$suggesterPanel) {
       return false;
@@ -432,12 +638,19 @@ class SuggesterPanel {
     } else if (keyCode === 13) {
       evt.stopPropagation();
       this.cursorMove = false;
-      this.pasteSelectResult(this.findSelectedItemIndex());
+      this.pasteSelectResult(this.findSelectedItemIndex(), evt);
       codemirror.focus();
       // const cache = JSON.parse(JSON.stringify(this.cursorTo));
       // setTimeout(() => {
       //   codemirror.setCursor(cache);
       // }, 100);
+      setTimeout(() => {
+        this.stopRelate();
+      }, 0);
+    } else if (keyCode === 27) {
+      // 按下esc的时候退出联想
+      evt.stopPropagation();
+      codemirror.focus();
       setTimeout(() => {
         this.stopRelate();
       }, 0);

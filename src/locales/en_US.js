@@ -29,7 +29,7 @@ export default {
   quickTable: 'Quick Table',
   quote: 'Quote',
   size: 'Size',
-  color: 'Color',
+  color: 'Text Color & Background',
   strikethrough: 'Strikethrough',
   sub: 'Sub',
   sup: 'Sup',
@@ -80,4 +80,7 @@ export default {
   exportScreenshot: 'Screenshot',
   exportMarkdownFile: 'Export Markdown File',
   exportHTMLFile: 'Export preview HTML File',
+  'H1 Heading': 'H1 Heading',
+  'H2 Heading': 'H1 Heading',
+  'H3 Heading': 'H1 Heading',
 };

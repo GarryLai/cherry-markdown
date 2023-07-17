@@ -384,7 +384,7 @@ export default class Cherry extends CherryStatic {
 
   /**
    * @private
-   * @returns
+   * @returns {Toolbar}
    */
   createToolbar() {
     const dom = createElement('div', 'cherry-toolbar');
@@ -604,5 +604,13 @@ export default class Cherry extends CherryStatic {
    */
   setTheme(theme = 'default') {
     changeTheme(this, theme);
+  }
+
+  /**
+   * 修改书写风格
+   * @param {string} writingStyle normal 普通 | typewriter 打字机 | focus 专注
+   */
+  setWritingStyle(writingStyle) {
+    this.editor.setWritingStyle(writingStyle);
   }
 }

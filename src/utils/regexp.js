@@ -158,12 +158,13 @@ export function getCodeBlockRule() {
     /**
      * (?:^|\n)是区块的通用开头
      * (\n*)捕获区块前的所有换行
+     * ((?:>\s*)*) 捕获代码块前面的引用（"> > > " 这种东西）
      * (?:[^\S\n]*)捕获```前置的空格字符
      * 只要有连续3个及以上`并且前后`的数量相等，则认为是代码快语法
      */
-    begin: /(?:^|\n)(\n*(?:[^\S\n]*))(`{3,})([^`]*?)\n/,
+    begin: /(?:^|\n)(\n*((?:>[\t ]*)*)(?:[^\S\n]*))(`{3,})([^`]*?)\n/,
     content: /([\w\W]*?)/, // '([\\w\\W]*?)',
-    end: /[^\S\n]*\2[ \t]*(?=$|\n+)/, // '\\s*```[ \\t]*(?=$|\\n+)',
+    end: /[^\S\n]*\3[ \t]*(?=$|\n+)/, // '\\s*```[ \\t]*(?=$|\\n+)',
   };
   codeBlock.reg = new RegExp(codeBlock.begin.source + codeBlock.content.source + codeBlock.end.source, 'g');
   return codeBlock;
@@ -176,7 +177,7 @@ export function getCodeBlockRule() {
  * @returns {String}
  */
 export function getListFromStr(selection, type) {
-  let $selection = selection ? selection : 'No.1\n    No.1.1\nNo.2';
+  let $selection = selection ? selection : 'Item 1\n    Item 1.1\nItem 2';
   $selection = $selection.replace(/^\n+/, '').replace(/\n+$/, '');
   let pre = '1.';
   switch (type) {
