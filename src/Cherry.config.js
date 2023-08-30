@@ -32,8 +32,24 @@ const callbacks = {
         isShadow: true,
         isRadius: true,
       });
+    } else if (/image/i.test(file.type)) {
+      // 如果上传的是图片，则默认回显base64内容（因为没有图床）
+      // 创建 FileReader 对象
+      const reader = new FileReader();
+      // 读取文件内容
+      reader.onload = (event) => {
+        // 获取 base64 内容
+        const base64Content = event.target.result;
+        callback(base64Content, {
+          name: `${file.name.replace(/\.[^.]+$/, '')}`,
+          isShadow: true,
+          width: '60%',
+          height: 'auto',
+        });
+      };
+      reader.readAsDataURL(file);
     } else {
-      callback('images/demo-dog.png', { name: `${file.name.replace(/\.[^.]+$/, '')}`, isShadow: true });
+      callback('images/demo-dog.png');
     }
   },
   afterChange: (text, html) => {},
@@ -273,6 +289,20 @@ const defaultConfig = {
     sidebar: [],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'table', 'code'], // array or false
+    // 快捷键配置，如果配置为空，则使用toolbar的配置
+    shortcutKey: {
+      // 'Alt-1': 'header',
+      // 'Alt-2': 'header',
+      // 'Ctrl-b': 'bold',
+      // 'Ctrl-Alt-m': 'formula',
+    },
+    // 一些按钮的配置信息
+    config: {
+      formula: {
+        showLatexLive: true, // true: 显示 www.latexlive.com 外链； false：不显示
+        templateConfig: false, // false: 使用默认模板
+      },
+    },
   },
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: '',

@@ -165,9 +165,15 @@ export function getCodeBlockRule() {
     begin: /(?:^|\n)(\n*((?:>[\t ]*)*)(?:[^\S\n]*))(`{3,})([^`]*?)\n/,
     content: /([\w\W]*?)/, // '([\\w\\W]*?)',
     end: /[^\S\n]*\3[ \t]*(?=$|\n+)/, // '\\s*```[ \\t]*(?=$|\\n+)',
+    reg: new RegExp(''),
   };
   codeBlock.reg = new RegExp(codeBlock.begin.source + codeBlock.content.source + codeBlock.end.source, 'g');
-  return codeBlock;
+  return {
+    ...codeBlock,
+    begin: codeBlock.begin.source,
+    content: codeBlock.content.source,
+    end: codeBlock.end.source,
+  };
 }
 
 /**
@@ -244,7 +250,7 @@ export function getDetailRule() {
 }
 
 // 匹配图片URL里的base64
-export const imgBase64Reg = /(!\[[^\n]*?\]\(data:image\/png;base64,)([^)]+)\)/g;
+export const imgBase64Reg = /(!\[[^\n]*?\]\(data:image\/[a-z]{1,10};base64,)([^)]+)\)/g;
 
 // 匹配图片{}里的data-xml属性
 export const imgDrawioXmlReg = /(!\[[^\n]*?\]\([^)]+\)\{[^}]* data-xml=)([^}]+)\}/g;
@@ -253,4 +259,5 @@ export const imgDrawioXmlReg = /(!\[[^\n]*?\]\([^)]+\)\{[^}]* data-xml=)([^}]+)\
  * 匹配draw.io的图片语法
  * 图片的语法为 ![alt](${base64}){data-type=drawio data-xml=${xml}}
  */
-export const imgDrawioReg = /(!\[[^\n]*?\]\(data:image\/png;base64,[^)]+\)\{data-type=drawio data-xml=[^}]+\})/g;
+export const imgDrawioReg =
+  /(!\[[^\n]*?\]\(data:image\/[a-z]{1,10};base64,[^)]+\)\{data-type=drawio data-xml=[^}]+\})/g;

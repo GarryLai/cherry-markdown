@@ -37,7 +37,6 @@ export default class Toolbar {
       dom: document.createElement('div'),
       buttonConfig: ['bold'],
       customMenu: [],
-      buttonRightConfig: [],
     };
 
     Object.assign(this.options, options);
@@ -88,7 +87,6 @@ export default class Toolbar {
    */
   drawMenus() {
     const fragLeft = document.createDocumentFragment();
-    const toolbarLeft = createElement('div', 'toolbar-left');
 
     this.menus.level1MenusName.forEach((name) => {
       const btn = this.menus.hooks[name].createBtn();
@@ -105,42 +103,13 @@ export default class Toolbar {
       fragLeft.appendChild(btn);
     });
 
-    toolbarLeft.appendChild(fragLeft);
-    this.options.dom.appendChild(toolbarLeft);
-
-    this.options.buttonRightConfig?.length ? this.drawRightMenus(this.options.buttonRightConfig) : null;
+    this.appendMenusToDom(fragLeft);
   }
-  /**
-   * 根据配置画出来右侧一级工具栏
-   */
-  drawRightMenus(buttonRightConfig) {
-    const toolbarRight = createElement('div', 'toolbar-right');
-    const fragRight = document.createDocumentFragment();
-    const rightOptions = {
-      options: {
-        $cherry: this.$cherry,
-        buttonConfig: buttonRightConfig,
-        customMenu: [],
-      },
-    };
 
-    const rightMenus = new HookCenter(rightOptions);
-
-    rightMenus.level1MenusName.forEach((name) => {
-      const btn = rightMenus.hooks[name].createBtn();
-      btn.addEventListener(
-        'click',
-        (event) => {
-          console.log('第一次点击');
-          rightMenus.hooks[name].fire(event, name);
-        },
-        false,
-      );
-      fragRight.appendChild(btn);
-    });
-
-    toolbarRight.appendChild(fragRight);
-    this.options.dom.appendChild(toolbarRight);
+  appendMenusToDom(menus) {
+    const toolbarLeft = createElement('div', 'toolbar-left');
+    toolbarLeft.appendChild(menus);
+    this.options.dom.appendChild(toolbarLeft);
   }
 
   setSubMenuPosition(menuObj, subMenuObj) {
@@ -199,6 +168,7 @@ export default class Toolbar {
    * 展开/收起二级菜单
    */
   toggleSubMenu(name) {
+    console.log('name: ', name);
     if (!this.subMenus[name]) {
       // 如果没有二级菜单，则先画出来，然后再显示
       this.hideAllSubMenu();
@@ -227,14 +197,34 @@ export default class Toolbar {
   }
 
   /**
+   * 收集工具栏的各项信息，主要有：
+   *   this.toolbarHandlers
+   *   this.menus.hooks
+   *   this.shortcutKeyMap
+   * @param {Toolbar} toolbarObj 工具栏对象
+   */
+  collectMenuInfo(toolbarObj) {
+    this.toolbarHandlers = Object.assign({}, this.toolbarHandlers, toolbarObj.toolbarHandlers);
+    this.menus.hooks = Object.assign({}, this.menus.hooks, toolbarObj.menus.hooks);
+    // 只有没设置自定义快捷键的时候才需要收集其他toolbar对象的快捷键配置
+    if (!this.options.shortcutKey || Object.keys(this.options.shortcutKey).length <= 0) {
+      this.shortcutKeyMap = Object.assign({}, this.shortcutKeyMap, toolbarObj.shortcutKeyMap);
+    }
+  }
+
+  /**
    * 收集快捷键
    */
   collectShortcutKey() {
-    this.menus.allMenusName.forEach((name) => {
-      this.menus.hooks[name].shortcutKeys?.forEach((key) => {
-        this.shortcutKeyMap[key] = name;
+    if (this.options.shortcutKey && Object.keys(this.options.shortcutKey).length > 0) {
+      this.shortcutKeyMap = this.options.shortcutKey;
+    } else {
+      this.menus.allMenusName.forEach((name) => {
+        this.menus.hooks[name].shortcutKeys?.forEach((key) => {
+          this.shortcutKeyMap[key] = name;
+        });
       });
-    });
+    }
   }
 
   collectToolbarHandler() {

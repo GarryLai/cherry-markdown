@@ -1,6 +1,9 @@
 <p align="center"><img src="logo/new_logo.png" alt="cherry logo" width="50%"/></p>
 
 # Cherry Markdown Writer
+[WIKI](https://github.com/Tencent/cherry-markdown/wiki)
+
+[![Cloud Studio Template](https://cs-res.codehub.cn/common/assets/icon-badge.svg)](https://cloudstudio.net#https://github.com/Tencent/cherry-markdown)
 
 English | [简体中文](./README.CN.md)
 
@@ -59,7 +62,7 @@ Cherry Markdown has a variety of style themes to choose from.
 
 ### Features show
 
-click [here](./docs/guide/features.md) for more details
+click [here](https://github.com/Tencent/cherry-markdown/wiki/%E7%89%B9%E6%80%A7%E5%B1%95%E7%A4%BA-features) for more details
 
 ### Demos
 
@@ -90,11 +93,11 @@ npm install cherry-markdown --save
 
 If you need to enable the functions of `mermaid` drawing and table-to-chart, you need to add `mermaid` and `echarts` packages at the same time.
 
-Currently, the plug-in version **Cherry** recommend is `echarts@4.6.0` `mermaid@8.11.1`.
+Currently, the plug-in version **Cherry** recommend is `echarts@4.6.0` `mermaid@9.4.3`.
 
 ```bash
 # Install mermaid, enable mermaid and drawing function
-yarn add mermaid@8.11.1
+yarn add mermaid@9.4.3
 # Install echarts, turn on the table-to-chart function
 yarn add echarts@4.6.0
 ```

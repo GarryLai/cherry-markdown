@@ -233,6 +233,10 @@ export interface CherryToolbarOptions {
   /** 新行悬停菜单配置 */
   float?: any[] | false;
   customMenu?: Record<string, any>;
+  /** 自定义快捷键 */
+  shortcutKey?: Object | false;
+   /** 一些按钮的配置信息 */
+  config?: Object;
 }
 
 export interface CherryFileUploadHandler {
