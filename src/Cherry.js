@@ -27,7 +27,6 @@ import { customizer, getThemeFromLocal, changeTheme } from './utils/config';
 import NestedError, { $expectTarget } from './utils/error';
 import getPosBydiffs from './utils/recount-pos';
 import defaultConfig from './Cherry.config';
-import './sass/cherry.scss';
 import cloneDeep from 'lodash/cloneDeep';
 import Event from './Event';
 import locales from '@/locales/index';
@@ -164,9 +163,6 @@ export default class Cherry extends CherryStatic {
     // default value init
     this.initText(editor.editor);
 
-    // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
-    this.switchModel(this.options.editor.defaultModel);
-
     Event.on(this.instanceId, Event.Events.toolbarHide, () => {
       this.status.toolbar = 'hide';
     });
@@ -187,14 +183,15 @@ export default class Cherry extends CherryStatic {
     Event.on(this.instanceId, Event.Events.editorOpen, () => {
       this.status.editor = 'show';
     });
+
+    // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
+    this.switchModel(this.options.editor.defaultModel);
   }
 
   /**
    * 切换编辑模式
-   * @param {'edit&preview'|'editOnly'|'previewOnly'} model 模式类型
+   * @param {'edit&preview'|'editOnly'|'previewOnly'} [model=edit&preview] 模式类型
    * 一般纯预览模式和纯编辑模式适合在屏幕较小的终端使用，比如手机移动端
-   *
-   * @returns
    */
   switchModel(model = 'edit&preview') {
     switch (model) {
@@ -249,15 +246,15 @@ export default class Cherry extends CherryStatic {
 
   /**
    * 获取编辑区内的markdown源码内容
-   * @returns markdown源码内容
+   * @returns {string} markdown源码内容
    */
   getMarkdown() {
     return this.getValue();
   }
 
   /**
-   * 获取CodeMirror实例
-   * @returns CodeMirror实例
+   * 获取CodeMirror 实例
+   * @returns { CodeMirror.Editor } CodeMirror实例
    */
   getCodeMirror() {
     return this.editor.editor;
@@ -265,20 +262,28 @@ export default class Cherry extends CherryStatic {
 
   /**
    * 获取预览区内的html内容
-   * @param {boolean} wrapTheme 是否在外层包裹主题class
-   * @returns html内容
+   * @param {boolean} [wrapTheme=true] 是否在外层包裹主题class
+   * @returns {string} html内容
    */
   getHtml(wrapTheme = true) {
     return this.previewer.getValue(wrapTheme);
   }
-
+  /**
+   * 获取Previewer 预览实例
+   * @returns {Previewer} Previewer 预览实例
+   */
   getPreviewer() {
     return this.previewer;
   }
 
   /**
+   * @typedef {{
+   *  level: number;
+   * id: string;
+   * text: string;
+   * }[]} HeaderList
    * 获取目录，目录由head1~6组成
-   * @returns 标题head数组
+   * @returns {HeaderList} 标题head数组
    */
   getToc() {
     const str = this.getHtml();
@@ -296,7 +301,6 @@ export default class Cherry extends CherryStatic {
    * 覆盖编辑区的内容
    * @param {string} content markdown内容
    * @param {boolean} keepCursor 是否保持光标位置
-   * @returns
    */
   setValue(content, keepCursor = false) {
     if (keepCursor === false) {
@@ -306,10 +310,9 @@ export default class Cherry extends CherryStatic {
     const old = this.getValue();
     const pos = codemirror.getDoc().indexFromPos(codemirror.getCursor());
     const newPos = getPosBydiffs(pos, old, content);
-    const ret = codemirror.setValue(content);
+    codemirror.setValue(content);
     const cursor = codemirror.getDoc().posFromIndex(newPos);
     codemirror.setCursor(cursor);
-    return ret;
   }
 
   /**
@@ -318,15 +321,13 @@ export default class Cherry extends CherryStatic {
    * @param {boolean} [isSelect=false] 是否选中刚插入的内容
    * @param {[number, number]|false} [anchor=false] [x,y] 代表x+1行，y+1字符偏移量，默认false 会从光标处插入
    * @param {boolean} [focus=true] 保持编辑器处于focus状态
-   * @returns
    */
   insert(content, isSelect = false, anchor = false, focus = true) {
     if (anchor) {
       this.editor.editor.setSelection({ line: anchor[0], ch: anchor[1] }, { line: anchor[0], ch: anchor[1] });
     }
-    const ret = this.editor.editor.replaceSelection(content, isSelect ? 'around' : 'end');
+    this.editor.editor.replaceSelection(content, isSelect ? 'around' : 'end');
     focus && this.editor.editor.focus();
-    return ret;
   }
 
   /**
@@ -357,8 +358,7 @@ export default class Cherry extends CherryStatic {
   /**
    * 覆盖编辑区的内容
    * @param {string} content markdown内容
-   * @param {boolean} keepCursor 是否保持光标位置
-   * @returns
+   * @param {boolean} [keepCursor=false] 是否保持光标位置
    */
   setMarkdown(content, keepCursor = false) {
     return this.setValue(content, keepCursor);
@@ -626,10 +626,11 @@ export default class Cherry extends CherryStatic {
   /**
    * 导出预览区域内容
    * @public
-   * @param {String} type 'pdf'：导出成pdf文件; 'img'：导出成图片
-   * @param {String} fileName 导出文件名
+   * @param {'pdf' | 'img' | 'markdown' | 'html'} [type='pdf']
+   * 'pdf'：导出成pdf文件; 'img'：导出成png图片; 'markdown'：导出成markdown文件; 'html'：导出成html文件;
+   * @param {string} [fileName] 导出文件名(默认为当前第一行内容|'cherry-export')
    */
-  export(type = 'pdf', fileName) {
+  export(type = 'pdf', fileName = '') {
     this.previewer.export(type, fileName);
   }
 

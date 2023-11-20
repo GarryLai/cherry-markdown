@@ -29,27 +29,6 @@ import LazyLoadImg from '@/utils/lazyLoadImg';
 let onScroll = () => {}; // store in memory for remove event
 
 /**
- * 解析第一个节点
- * @param {Node} node 经过DOMParser转换的HTML
- * @returns {String | null}
- */
-const findNonEmptyNode = (node) => {
-  // 如果节点是文本节点且内容不为空，则返回该节点
-  if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '') {
-    return node.textContent.trim();
-  }
-
-  for (let i = 0; i < node.childNodes.length; i++) {
-    const childNode = node.childNodes[i];
-    const result = findNonEmptyNode(childNode);
-    if (result) {
-      return result;
-    }
-  }
-  return null;
-};
-
-/**
  * 作用：
  *  dom更新
  *  局部加载（分片）
@@ -935,26 +914,15 @@ export default class Previewer {
   /**
    * 导出预览区域内容
    * @public
-   * @param {String} type 'pdf'：导出成pdf文件; 'img'：导出成图片
-   * @param {String |Function} fileName 导出文件名
+   * @param {'pdf' | 'img' | 'screenShot' | 'markdown' | 'html'} [type='pdf']
+   * 'pdf'：导出成pdf文件; 'img' | screenShot：导出成png图片; 'markdown'：导出成markdown文件; 'html'：导出成html文件;
+   * @param {string} [fileName] 导出文件名
    */
   export(type = 'pdf', fileName = '') {
-    // console.log(this.options);
-    let name;
-    if (!fileName) {
-      const parser = new DOMParser();
-      const domTree = parser.parseFromString(this.getValue(), 'text/html');
-      const firstNodeText = findNonEmptyNode(domTree);
-      firstNodeText ? (name = firstNodeText) : (name = 'cherry');
-    }
-    // if (typeof fileName === 'function') {
-    //   name = fileName();
-    // } else {
-    //   name = fileName;
-    // }
+    const name = fileName || this.getDomContainer().innerText.match(/^\s*([^\s][^\n]*)\n/)[1] || 'cherry-export';
     if (type === 'pdf') {
       exportPDF(this.getDomContainer(), name);
-    } else if (type === 'screenShot') {
+    } else if (type === 'screenShot' || type === 'img') {
       exportScreenShot(this.getDomContainer(), name);
     } else if (type === 'markdown') {
       exportMarkdownFile(this.$cherry.getMarkdown(), name);

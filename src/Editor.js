@@ -15,7 +15,6 @@
  */
 // @ts-check
 import codemirror from 'codemirror';
-import 'codemirror/lib/codemirror.css';
 // import 'codemirror/mode/markdown/markdown';
 import 'codemirror/mode/gfm/gfm'; // https://codemirror.net/mode/gfm/index.html
 // import 'codemirror/mode/xml/xml';
@@ -114,13 +113,15 @@ export default class Editor {
   }
 
   /**
-   * 处理draw.io的xml数据和图片的base64数据，对这种超大的数据增加省略号
+   * 在onChange后处理draw.io的xml数据和图片的base64数据，对这种超大的数据增加省略号，
+   * 以及对全角符号进行特殊染色。
    */
-  dealBigData = () => {
+  dealSpecialWords = () => {
     if (this.noChange) {
       this.noChange = false;
       return;
     }
+    this.formatFullWidthMark();
     this.formatBigData2Mark(imgBase64Reg, 'cm-url base64');
     this.formatBigData2Mark(imgDrawioXmlReg, 'cm-url drawio');
   };
@@ -157,6 +158,78 @@ export default class Editor {
     }
   };
 
+  /**
+   * 高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》
+   * full width翻译为全角
+   */
+  formatFullWidthMark() {
+    const { editor } = this;
+    const regex = /[·￥、：“”【】（）《》]/; // 此处以仅匹配单个全角符号
+    const searcher = editor.getSearchCursor(regex);
+    let oneSearch = searcher.findNext();
+    // 防止出现错误的mark
+    editor.getAllMarks().forEach(function (mark) {
+      const range = JSON.parse(JSON.stringify(mark.find()));
+      const markedText = editor.getRange(range.from, range.to);
+      if (mark.className === 'cm-fullWidth' && !regex.test(markedText)) {
+        mark.clear();
+      }
+    });
+    for (; oneSearch !== false; oneSearch = searcher.findNext()) {
+      const target = searcher.from();
+      if (!target) {
+        continue;
+      }
+      const from = { line: target.line, ch: target.ch };
+      const to = { line: target.line, ch: target.ch + 1 };
+      // 当没有标记时再进行标记，判断textMaker的className必须为"cm-fullWidth"，
+      // 因为cm的addon里会引入className: "CodeMirror-composing"的textMaker干扰判断
+      const existMarksLength = editor.findMarks(from, to).filter((item) => {
+        return item.className === 'cm-fullWidth';
+      });
+      if (existMarksLength.length === 0) {
+        editor.markText(from, to, {
+          className: 'cm-fullWidth',
+          title: '按住Ctrl/Cmd点击切换成半角（Hold down Ctrl/Cmd and click to switch to half-width）',
+        });
+      }
+    }
+  }
+
+  /**
+   *
+   * @param {CodeMirror.Editor} codemirror
+   * @param {MouseEvent} evt
+   */
+  toHalfWidth(codemirror, evt) {
+    const { target } = evt;
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+    // 针对windows用户为Ctrl按键，Mac用户为Cmd按键
+    if (target.classList.contains('cm-fullWidth') && (evt.ctrlKey || evt.metaKey) && evt.buttons === 1) {
+      const rect = target.getBoundingClientRect();
+      // 由于是一个字符，所以肯定在一行
+      const from = codemirror.coordsChar({ left: rect.left, top: rect.top });
+      const to = { line: from.line, ch: from.ch + 1 };
+      codemirror.setSelection(from, to);
+      codemirror.replaceSelection(
+        target.innerText
+          .replace('·', '`')
+          .replace('￥', '$')
+          .replace('、', '/')
+          .replace('：', ':')
+          .replace('“', '"')
+          .replace('”', '"')
+          .replace('【', '[')
+          .replace('】', ']')
+          .replace('（', '(')
+          .replace('）', ')')
+          .replace('《', '<')
+          .replace('》', '>'),
+      );
+    }
+  }
   /**
    *
    * @param {KeyboardEvent} e
@@ -271,6 +344,7 @@ export default class Editor {
     const { line: targetLine } = codemirror.getCursor();
     const top = Math.abs(evt.y - codemirror.getWrapperElement().getBoundingClientRect().y);
     this.previewer.scrollToLineNumWithOffset(targetLine + 1, top);
+    this.toHalfWidth(codemirror, evt);
   };
 
   /**
@@ -329,7 +403,7 @@ export default class Editor {
 
     editor.on('change', (codemirror, evt) => {
       this.options.onChange(evt, codemirror);
-      this.dealBigData();
+      this.dealSpecialWords();
       if (this.options.autoSave2Textarea) {
         // @ts-ignore
         // 将codemirror里的内容回写到textarea里
@@ -379,7 +453,7 @@ export default class Editor {
               // 当批量上传文件时，每个被插入的文件中间需要加个换行，但单个上传文件的时候不需要加换行
               const insertValue = i > 0 ? `\n${mdStr} ` : `${mdStr} `;
               codemirror.replaceSelection(insertValue);
-              this.dealBigData();
+              this.dealSpecialWords();
             });
           }
         }, 50);
@@ -535,6 +609,9 @@ export default class Editor {
    */
   refreshWritingStatus() {
     const { writingStyle } = this.options;
+    if (writingStyle !== 'focus' && writingStyle !== 'typewriter') {
+      return;
+    }
     const className = `cherry-editor-writing-style--${writingStyle}`;
     /**
      * @type {HTMLStyleElement}

@@ -21,6 +21,13 @@ function generateExample(title, mermaidCode) {
 
 const flowChartContent = ['\tA[公司] -->| 下 班 | B(菜市場)', '\tB --> C{看見<br>賣西瓜的}', '\tC -->|Yes| D[買一個包子]', '\tC -->|No| E[買一斤包子]'].join('\n');
 
+const flowChartContentEn = [
+  '\tA[Company] -->| Finish work | B(Grocery Store)',
+  '\tB --> C{See<br>Watermelon Seller}',
+  '\tC -->|Yes| D[Buy a bun]',
+  '\tC -->|No| E[Buy a kilogram of buns]',
+].join('\n');
+
 const sample = {
   flow: ['FlowChart', generateExample('左右結構', "graph LR\n".concat(flowChartContent)), generateExample('上下結構', "graph TD\n".concat(flowChartContent))].join('\n'),
   sequence: generateExample('SequenceDiagram', ['sequenceDiagram', 'autonumber', 'A-->A: 文字1', 'A->>B: 文字2', 'loop 循環1', 'loop 循環2', 'A->B: 文字3', 'end', 'loop 循環3', 'B -->>A: 文字4', 'end', 'B -->> B: 文字5', 'end'].join('\n')),
@@ -28,6 +35,87 @@ const sample = {
   "class": generateExample('ClassDiagram', ['classDiagram', 'Base <|-- One', 'Base <|-- Two', 'Base : +String name', 'Base: +getName()', 'Base: +setName(String name)', 'class One{', '  \t+String newName', '  \t+getNewName()', '}', 'class Two{', '  \t-int id', '  \t-getId()', '}'].join('\n')),
   pie: generateExample('PieChart', ['pie', 'title 圓餅圖', '"A" : 100', '"B" : 80', '"C" : 40', '"D" : 30'].join('\n')),
   gantt: generateExample('GanttChart', ['gantt', '\ttitle 敏捷研發流程', '\tsection 迭代前', '\t\t互動設計     :a1, 2020-03-01, 4d', '\t\tUI設計        :after a1, 5d', '\t\t需求評審     : 1d', '\tsection 迭代中', '\t\t詳細設計      :a2, 2020-03-11, 2d', '\t\t開發          :2020-03-15, 7d', '\t\t測試          :2020-03-22, 5d', '\tsection 迭代後', '\t\t發佈: 1d', '\t\t驗收: 2d', '\t\t回顧: 1d'].join('\n'))
+};
+
+// 英文例子
+const sampleEn = {
+  flow: [
+    'FlowChart',
+    generateExample('Left-right structure', `graph LR\n${flowChartContentEn}`),
+    generateExample('Top-bottom structure', `graph TD\n${flowChartContentEn}`),
+  ].join('\n'),
+  sequence: generateExample(
+    'SequenceDiagram',
+    [
+      'sequenceDiagram',
+      'autonumber',
+      'A-->A: text1',
+      'A->>B: text2',
+      'loop loop1',
+      'loop loop2',
+      'A->B: text3',
+      'end',
+      'loop loop3',
+      'B -->>A: text4',
+      'end',
+      'B -->> B: text5',
+      'end',
+    ].join('\n'),
+  ),
+  state: generateExample(
+    'StateDiagram',
+    [
+      'stateDiagram-v2',
+      '[*] --> A',
+      'A --> B',
+      'A --> C',
+      'state A {',
+      '  \t[*] --> D',
+      '  \tD --> [*]',
+      '}',
+      'B --> [*]',
+      'C --> [*]',
+    ].join('\n'),
+  ),
+  class: generateExample(
+    'ClassDiagram',
+    [
+      'classDiagram',
+      'Base <|-- One',
+      'Base <|-- Two',
+      'Base : +String name',
+      'Base: +getName()',
+      'Base: +setName(String name)',
+      'class One{',
+      '  \t+String newName',
+      '  \t+getNewName()',
+      '}',
+      'class Two{',
+      '  \t-int id',
+      '  \t-getId()',
+      '}',
+    ].join('\n'),
+  ),
+  pie: generateExample('PieChart', ['pie', 'title pie', '"A" : 100', '"B" : 80', '"C" : 40', '"D" : 30'].join('\n')),
+  gantt: generateExample(
+    'GanttChart',
+    [
+      'gantt',
+      '\ttitle work',
+      '\tsection session 1',
+      '\t\twork1     :a1, 2020-03-01, 4d',
+      '\t\twork2        :after a1, 5d',
+      '\t\twork3     : 1d',
+      '\tsection session 2',
+      '\t\twork4      :a2, 2020-03-11, 2d',
+      '\t\twork5          :2020-03-15, 7d',
+      '\t\twork6          :2020-03-22, 5d',
+      '\tsection session 3',
+      '\t\twork7: 1d',
+      '\t\twork8: 2d',
+      '\t\twork9: 1d',
+    ].join('\n'),
+  ),
 };
 
 /**
@@ -39,6 +127,7 @@ export default class Graph extends MenuBase {
     super($cherry);
     this.setName('graph', 'insertChart');
     this.noIcon = true;
+    this.localeName = $cherry.options.locale;
     this.subMenuConfig = [
       // 流程图
       // 访问[Mermaid 流程图](https://mermaid-js.github.io/mermaid/#/flowchart)参考具体使用方法。
@@ -67,20 +156,20 @@ export default class Graph extends MenuBase {
   /**
    * 响应点击事件
    * @param {string} selection 被用户选中的文本内容，本函数不处理选中的内容，会直接清空用户选中的内容
-   * @param {string} shortKey 快捷键参数
+   * @param {1|2|3|4|5|6|'1'|'2'|'3'|'4'|'5'|'6'|'flow'|'sequence'|'state'|'class'|'pie'|'gantt'|''} shortKey 快捷键参数
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    const shortcut = `${shortKey}`;
-    const shortcutKeyMap = [, 'flow', 'sequence', 'state', 'class', 'pie', 'gantt'];
-    const selectedExample = shortcutKeyMap[+shortcut];
-    if (!shortcutKeyMap[+shortcut]) {
+    const shortcutKeyMap = [null, 'flow', 'sequence', 'state', 'class', 'pie', 'gantt'];
+    const type = shortcutKeyMap[shortKey] ? shortcutKeyMap[shortKey] : shortKey;
+
+    if (!type || !/^(flow|sequence|state|class|pie|gantt)$/.test(type)) {
       return;
     }
     this.registerAfterClickCb(() => {
       this.setLessSelection('\n\n\n\n\n', '\n\n');
     });
-    return `\n\n${this.$getSampleCode(selectedExample)}\n`;
+    return `\n\n${this.$getSampleCode(type)}\n`;
   }
 
   /**
@@ -89,6 +178,10 @@ export default class Graph extends MenuBase {
    * @returns
    */
   $getSampleCode(type) {
-    return sample[type].replace(/\t/g, '    ');
+    if (this.localeName !== 'zh-CN' && this.localeName !== 'zh_CN') {
+      // 只要不是中文，就返回英文例子
+      return sampleEn[type]?.replace(/\t/g, '    ');
+    }
+    return sample[type]?.replace(/\t/g, '    ');
   }
 }
