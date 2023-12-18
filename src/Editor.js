@@ -268,22 +268,7 @@ export default class Editor {
     const { items } = clipboardData;
     const types = clipboardData.types || [];
     const codemirrorDoc = codemirror.getDoc();
-    for (let i = 0; i < types.length; i++) {
-      const item = items[i];
-      // 判断是否为图片数据
-      if (item && item.kind === 'file' && item.type.match(/^image\//i)) {
-        // 读取该图片
-        const file = item.getAsFile();
-        this.options.fileUpload(file, (url, params = {}) => {
-          if (typeof url !== 'string') {
-            return;
-          }
-          const mdStr = handleFileUploadCallback(url, params, file);
-          codemirrorDoc.replaceSelection(mdStr);
-        });
-        event.preventDefault();
-      }
-    }
+    // HWDES: 此段刪除
 
     // 复制html转换markdown
     const htmlText = clipboardData.getData('text/plain');
