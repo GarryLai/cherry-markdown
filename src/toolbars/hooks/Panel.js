@@ -133,7 +133,7 @@ export default class Panel extends MenuBase {
         $selection = $selection.replace(/^[^\n]+\n/, '');
       }
     } else {
-      title = title ? title : '標題';
+      title = title ? title : '标题';
     }
     return `::: ${shortKey} ${title}\n${$selection}\n:::`.replace(/\n{2,}:::/g, '\n:::');
   }

@@ -45,7 +45,7 @@ export default class DrawIo extends MenuBase {
       this.registerAfterClickCb(() => {
         this.setLessSelection(begin, end);
       });
-      return `${begin}在預覽區點選圖片重新編輯draw.io${end}`;
+      return `${begin}在预览区点击图片重新编辑draw.io${end}`;
     }
     // 插入图片，调用上传文件逻辑
     drawioDialog(this.drawioIframeUrl, '', (data) => {

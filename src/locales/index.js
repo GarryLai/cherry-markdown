@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import zhTw from './zh_TW';
 import zhCn from './zh_CN';
 import enUs from './en_US';
 
 export default {
-  zh_TW: zhTw,
   zh_CN: zhCn,
   en_US: enUs,
 };
