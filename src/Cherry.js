@@ -21,7 +21,6 @@ import Bubble from './toolbars/Bubble';
 import FloatMenu from './toolbars/FloatMenu';
 import Toolbar from './toolbars/Toolbar';
 import ToolbarRight from './toolbars/ToolbarRight';
-import Toc from './toolbars/Toc';
 import { createElement } from './utils/dom';
 import Sidebar from './toolbars/Sidebar';
 import { customizer, getThemeFromLocal, changeTheme } from './utils/config';
@@ -187,45 +186,6 @@ export default class Cherry extends CherryStatic {
 
     // 切换模式，有纯预览模式、纯编辑模式、双栏编辑模式
     this.switchModel(this.options.editor.defaultModel);
-
-    // 如果配置了初始化后根据hash自动滚动
-    if (this.options.autoScrollByHashAfterInit) {
-      setTimeout(this.scrollByHash.bind(this));
-    }
-    // 强制进行一次渲染
-    this.editText(null, this.editor.editor);
-    if (this.options.toolbars.toc !== false) {
-      this.createToc();
-    }
-  }
-
-  createToc() {
-    this.toc = new Toc({
-      $cherry: this,
-      // @ts-ignore
-      updateLocationHash: this.options.toolbars.toc.updateLocationHash ?? true,
-      // @ts-ignore
-      defaultModel: this.options.toolbars.toc.defaultModel ?? 'pure',
-    });
-  }
-
-  /**
-   * 滚动到hash位置，实际上就是通过修改location.hash来触发hashChange事件，剩下的就交给浏览器了
-   */
-  scrollByHash() {
-    if (location.hash) {
-      try {
-        const { hash } = location;
-        // 检查是否有对应id的元素
-        const testDom = document.getElementById(hash.replace('#', ''));
-        if (testDom && this.previewer.getDomContainer().contains(testDom)) {
-          location.hash = '';
-          location.hash = hash;
-        }
-      } catch (error) {
-        // empty
-      }
-    }
   }
 
   /**
@@ -243,7 +203,6 @@ export default class Cherry extends CherryStatic {
         if (this.toolbar) {
           this.toolbar.showToolbar();
         }
-        this.wrapperDom.classList.remove('cherry--no-toolbar');
         break;
       case 'editOnly':
         if (!this.previewer.isPreviewerHidden()) {
@@ -252,12 +211,10 @@ export default class Cherry extends CherryStatic {
         if (this.toolbar) {
           this.toolbar.showToolbar();
         }
-        this.wrapperDom.classList.remove('cherry--no-toolbar');
         break;
       case 'previewOnly':
         this.previewer.previewOnly();
         this.toolbar && this.toolbar.previewOnly();
-        this.wrapperDom.classList.add('cherry--no-toolbar');
         break;
     }
   }
@@ -334,7 +291,7 @@ export default class Cherry extends CherryStatic {
     const headerList = [];
     const headerRegex = /<h([1-6]).*?id="([^"]+?)".*?>(.+?)<\/h[0-6]>/g;
     str.replace(headerRegex, (match, level, id, text) => {
-      headerList.push({ level: +level, id, text: text.replace(/<a .+?<\/a>/, '') });
+      headerList.push({ level: +level, id, text });
       return match;
     });
     return headerList;
@@ -346,7 +303,6 @@ export default class Cherry extends CherryStatic {
    * @param {boolean} keepCursor 是否保持光标位置
    */
   setValue(content, keepCursor = false) {
-    this.editor.storeDocumentScroll();
     if (keepCursor === false) {
       return this.editor.editor.setValue(content);
     }
@@ -624,7 +580,6 @@ export default class Cherry extends CherryStatic {
         }
         // 强制每次编辑（包括undo、redo）编辑器都会自动滚动到光标位置
         codemirror.scrollIntoView(null);
-        this.editor.restoreDocumentScroll();
       }, 50);
     } catch (e) {
       throw new NestedError(e);

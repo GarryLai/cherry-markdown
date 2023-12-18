@@ -48,8 +48,6 @@ export interface CherryOptions {
   autoScrollByCursor: boolean;
   /** 外层容器不存在时，是否强制输出到body上 */
   forceAppend: boolean;
-  /** cherry初始化后是否检查 location.hash 尝试滚动到对应位置 */
-  autoScrollByHashAfterInit: boolean;
   /** 挂载DOM节点ID，引擎模式下不生效 */
   id?: string;
   /** 挂载DOM节点，引擎模式下不生效 */
@@ -134,8 +132,6 @@ export interface CherryEditorOptions {
   codemirror?: object;
   /** 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal */
   writingStyle?: string;
-  /** 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置 */
-  keepDocumentScrollAfterInit?: boolean;
 }
 
 export type CherryLifecycle = (text: string, html: string) => void;
@@ -228,11 +224,6 @@ export interface CherryToolbarOptions {
   toolbarRight?:
     | (CherryCustomToolbar | CherryDefaultBubbleToolbar | CherryDefaultBubbleToolbar | CherryDefaultToolbar)[]
     | false;
-  /** 是否展示悬浮目录 */
-  toc?: false | {
-    updateLocationHash: boolean, // 要不要更新URL的hash
-    defaultModel: 'pure' | 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
-  };
   /** 是否展示顶部工具栏 */
   showToolbar?: boolean;
   /** 侧边栏配置 */

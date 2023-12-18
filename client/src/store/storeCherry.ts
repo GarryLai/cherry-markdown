@@ -8,7 +8,6 @@ type CherryToc = {
 }
 
 /**
- * 
  * @param cherry - Cherry 实例
  * @param cherryMarkdown - CherryMarkdown 的 markdown 文本
  */
@@ -19,7 +18,7 @@ type CherryState = {
   cherryToc: CherryToc[];
 }
 
-export const useStoreCherry = defineStore('cherry', {
+export const useStoreCherry = defineStore('cherry-markdown', {
   state: (): CherryState => ({
     cherry: null,
     cherryMarkdown: '',

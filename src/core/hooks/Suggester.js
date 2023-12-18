@@ -99,10 +99,12 @@ export default class Suggester extends SyntaxBase {
     let { suggester } = config;
 
     this.suggester = {};
-    const defaultSuggest = [];
+    if (!suggester) {
+      suggester = [];
+    }
     // 默认的唤醒关键字
     for (const suggesterKeyword of suggesterKeywords) {
-      defaultSuggest.push({
+      suggester.push({
         keyword: suggesterKeyword,
         suggestList(_word, callback) {
           // 将word全转成小写
@@ -128,12 +130,6 @@ export default class Suggester extends SyntaxBase {
         },
       });
     }
-    if (!suggester) {
-      suggester = defaultSuggest;
-    } else {
-      suggester = suggester.concat(defaultSuggest);
-    }
-
     suggester.forEach((configItem) => {
       if (!configItem.suggestList) {
         console.warn('[cherry-suggester]: the suggestList of config is missing.');
@@ -503,15 +499,15 @@ class SuggesterPanel {
         typeof this.optionList[idx].value === 'string'
       ) {
         result = this.optionList[idx].value;
-      } else if (
+      }
+      if (
         typeof this.optionList[idx] === 'object' &&
         this.optionList[idx] !== null &&
         typeof this.optionList[idx].value === 'function'
       ) {
         result = this.optionList[idx].value();
-      } else if (typeof this.optionList[idx] === 'string') {
-        result = `${this.optionList[idx]} `;
-      } else {
+      }
+      if (typeof this.optionList[idx] === 'string') {
         result = ` ${this.keyword}${this.optionList[idx]} `;
       }
       // this.cursorTo.ch = this.cursorFrom.ch + result.length;

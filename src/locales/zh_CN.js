@@ -93,5 +93,4 @@ export default {
   justifyLeft: '左对齐',
   justifyCenter: '居中',
   justifyRight: '右对齐',
-  wordCount: '字数',
 };

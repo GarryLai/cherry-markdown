@@ -46,7 +46,6 @@ export type EditorConfiguration = {
   toolbars: any;
   value?: string;
   convertWhenPaste?: boolean;
-  keepDocumentScrollAfterInit?: boolean;
   codemirror: CodeMirror.EditorConfiguration;
   onKeydown: EditorEventCallback<EditorEventMap['onKeydown']>;
   onFocus: EditorEventCallback<EditorEventMap['onFocus']>;
