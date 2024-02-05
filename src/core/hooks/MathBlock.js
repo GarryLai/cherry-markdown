@@ -56,27 +56,27 @@ export default class MathBlock extends ParagraphBase {
     // 目前的机制还没有测过lines为负数的情况，先不处理
     lines = lines > 0 ? lines : 0;
 
+    // 既无MathJax又无katex时，原样输出
+    let result = '';
+
     if (this.engine === 'katex') {
       // katex渲染
       const html = this.katex.renderToString(content, {
         throwOnError: false,
         displayMode: true,
       });
-      const result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
+      result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
             data-lines="${lines}">${html}</div>`;
-      return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
-    }
-    if (this.MathJax?.tex2svg) {
+    } else if (this.MathJax?.tex2svg) {
       // MathJax渲染
       const svg = getHTML(this.MathJax.tex2svg(content), true);
-      const result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
+      result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
             data-lines="${lines}">${svg}</div>`;
-      return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
+    } else {
+      result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
+      data-lines="${lines}">$$${escapeFormulaPunctuations(content)}$$</div>`;
     }
 
-    // 既无MathJax又无katex时，原样输出
-    const result = `<div data-sign="${sign}" class="Cherry-Math" data-type="mathBlock"
-          data-lines="${lines}">$$${escapeFormulaPunctuations(content)}$$</div>`;
     return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
   }
 

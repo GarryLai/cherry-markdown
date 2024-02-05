@@ -2,6 +2,92 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.38](https://github.com/Tencent/cherry-markdown/compare/v0.8.37...v0.8.38) (2024-01-29)
+
+
+### Features
+
+* [#702](https://github.com/Tencent/cherry-markdown/issues/702) 提供销毁函数 ([bb3c856](https://github.com/Tencent/cherry-markdown/commit/bb3c85699b1430a5ad90387017f393f82793b5d1))
+* [#703](https://github.com/Tencent/cherry-markdown/issues/703) 增加动态重置工具栏的API ([4011335](https://github.com/Tencent/cherry-markdown/commit/4011335ec0b98adeb2aaa462b33a850767672b15))
+* 优化联想的选中逻辑，默认不选中任意选项，不影响回车键 ([5ef6505](https://github.com/Tencent/cherry-markdown/commit/5ef6505d7c4d1b994cb9c35342f3124bd02c9370))
+
+
+### Bug Fixes
+
+* 修复自定义keyword覆盖问题 ([#705](https://github.com/Tencent/cherry-markdown/issues/705)) ([aa099ea](https://github.com/Tencent/cherry-markdown/commit/aa099eaff80850b6c2bc87d2c321b9bebd739f3f))
+* 联想功能支持多实例 ([9d50c88](https://github.com/Tencent/cherry-markdown/commit/9d50c8806dc017f0575b14b4ba988a507faac9ca))
+
+### [0.8.37](https://github.com/Tencent/cherry-markdown/compare/v0.8.36...v0.8.37) (2024-01-25)
+
+
+### Bug Fixes
+
+* [#683](https://github.com/Tencent/cherry-markdown/issues/683) themeNamespace 没有应用到cherry的外层容器 ([56e0ee7](https://github.com/Tencent/cherry-markdown/commit/56e0ee71b05d818df4b22c3183b8922686895ef1))
+* 去掉冒号的联想 ([a03b749](https://github.com/Tencent/cherry-markdown/commit/a03b7498e09d714d64cdd40ccd1ac6565d63ee40))
+* 引入mathjax safe组件，防止通过mathjax引入xss注入 ([5e3e74c](https://github.com/Tencent/cherry-markdown/commit/5e3e74c96885c18d2be2e264bb713223f2d8517f))
+
+### [0.8.36](https://github.com/Tencent/cherry-markdown/compare/v0.8.35...v0.8.36) (2024-01-22)
+
+
+### Features
+
+* [#683](https://github.com/Tencent/cherry-markdown/issues/683) 增加主题缓存的命名空间机制 ([f4bf980](https://github.com/Tencent/cherry-markdown/commit/f4bf9808921ac7bb0161c2daee5e613018c55a05))
+* [#697](https://github.com/Tencent/cherry-markdown/issues/697) 代码块支持自动闭合 ([4989771](https://github.com/Tencent/cherry-markdown/commit/4989771151719a0fe5ab3a2135c2a5e01c142dbb))
+* **publish:** 支持发布功能 ([#689](https://github.com/Tencent/cherry-markdown/issues/689)) ([f7cc3a5](https://github.com/Tencent/cherry-markdown/commit/f7cc3a59ffb42ffd83a1684ffc2222080e1e9b5e))
+
+
+### Bug Fixes
+
+* [#683](https://github.com/Tencent/cherry-markdown/issues/683) 修复最小高度引入的样式问题 ([03f7a99](https://github.com/Tencent/cherry-markdown/commit/03f7a99dcf9db268eec53637509b524066511ca9))
+* [#698](https://github.com/Tencent/cherry-markdown/issues/698) 修复手风琴语法无法显示图片的问题 ([e232a99](https://github.com/Tencent/cherry-markdown/commit/e232a9958acf4a2ff5f7d88066f7cc5f0bdeea00))
+* **autolink:** fix unexpected %5c in uris with underscore ([#695](https://github.com/Tencent/cherry-markdown/issues/695)) ([3ac4b60](https://github.com/Tencent/cherry-markdown/commit/3ac4b60344cd0cfb55c0d02b49d3862cd22e54b4))
+* **Toc:** use `div` replace obsolete HTML elements `dir` ([#693](https://github.com/Tencent/cherry-markdown/issues/693)) ([30bef8d](https://github.com/Tencent/cherry-markdown/commit/30bef8d11e58c99c7a7cee58b17ab2980ad00e7e))
+
+### [0.8.35](https://github.com/Tencent/cherry-markdown/compare/v0.8.34...v0.8.35) (2024-01-12)
+
+
+### Features
+
+* **kbd:** add styles to \<kbd> tag & update examples ([#679](https://github.com/Tencent/cherry-markdown/issues/679)) ([ac3650d](https://github.com/Tencent/cherry-markdown/commit/ac3650d65eddb9e9b77337a336cfeb4206b82ea9))
+
+
+### Bug Fixes
+
+* add dom purifier to math result for security ([f79dc95](https://github.com/Tencent/cherry-markdown/commit/f79dc95acb93af6a8f5109cf1fd3ee1c78059343))
+* **client:** redeclare the 'toc' state ([#678](https://github.com/Tencent/cherry-markdown/issues/678)) ([9216837](https://github.com/Tencent/cherry-markdown/commit/9216837c57c0a02a78b9fb3ae7cd0ebfb21004f3)), closes [#675](https://github.com/Tencent/cherry-markdown/issues/675) [#676](https://github.com/Tencent/cherry-markdown/issues/676) [#677](https://github.com/Tencent/cherry-markdown/issues/677)
+* **xss:** fix potential xss in raw html ([596805c](https://github.com/Tencent/cherry-markdown/commit/596805cc6eaff2d0528bb75956abaf7ffdc3f9fe))
+* 修改示例中emoji表情的配置 ([66c3ecc](https://github.com/Tencent/cherry-markdown/commit/66c3ecca0e4e6cda7281f124f5063a116d772969))
+
+
+### Code Refactoring
+
+* **client:** use `cherry-markdown`'s TOC component ([#677](https://github.com/Tencent/cherry-markdown/issues/677)) ([b8899af](https://github.com/Tencent/cherry-markdown/commit/b8899af1052ec5b1f2ac1a2537b02a1000b0ea23))
+
+### [0.8.33](https://github.com/Tencent/cherry-markdown/compare/v0.8.32...v0.8.33) (2023-12-25)
+
+### [0.8.34](https://github.com/Tencent/cherry-markdown/compare/v0.8.32...v0.8.34) (2023-12-26)
+
+
+### Bug Fixes
+
+* [#657](https://github.com/Tencent/cherry-markdown/issues/657) closed 修复复制按钮点击报错问题 ([de3f368](https://github.com/Tencent/cherry-markdown/commit/de3f36859e58e2171726346a69fb58030e724b3b))
+* [#673](https://github.com/Tencent/cherry-markdown/issues/673) closed 修复粘贴excel只有图片的问题 ([9f46d5e](https://github.com/Tencent/cherry-markdown/commit/9f46d5e667e44d96f546bd0064332a37b212f184))
+* 额外兼容node场景 ([0d04a68](https://github.com/Tencent/cherry-markdown/commit/0d04a680f88fefd5516b9325e16adf59990b16ea))
+* 修复pointer event导致的误触，兼容浏览器不支持pointer event的情况 ([08965e5](https://github.com/Tencent/cherry-markdown/commit/08965e5dc05e2036c2443ed0ba089f4014c180e9))
+* 重构表格逆解析时，处理空格的逻辑 ([49e4907](https://github.com/Tencent/cherry-markdown/commit/49e49072f3224a04e07db2bb026a41db1302c0ea))
+
+### [0.8.31](https://github.com/Tencent/cherry-markdown/compare/v0.8.30...v0.8.31) (2023-12-07)
+
+### [0.8.33](https://github.com/Tencent/cherry-markdown/compare/v0.8.32...v0.8.33) (2023-12-25)
+
+
+### Bug Fixes
+
+* 额外兼容node场景 ([0d04a68](https://github.com/Tencent/cherry-markdown/commit/0d04a680f88fefd5516b9325e16adf59990b16ea))
+* 修复pointer event导致的误触，兼容浏览器不支持pointer event的情况 ([08965e5](https://github.com/Tencent/cherry-markdown/commit/08965e5dc05e2036c2443ed0ba089f4014c180e9))
+
+### [0.8.31](https://github.com/Tencent/cherry-markdown/compare/v0.8.30...v0.8.31) (2023-12-07)
+
 ### [0.8.32](https://github.com/Tencent/cherry-markdown/compare/v0.8.30...v0.8.32) (2023-12-18)
 
 
