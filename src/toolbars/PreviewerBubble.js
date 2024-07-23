@@ -18,7 +18,6 @@ import imgSizeHandler from '@/utils/imgSizeHandler';
 import TableHandler from '@/utils/tableContentHandler';
 import CodeHandler from '@/utils/codeBlockContentHandler';
 import { drawioDialog } from '@/utils/dialog';
-import Event from '@/Event';
 import { imgDrawioReg, getValueWithoutCode } from '@/utils/regexp';
 import debounce from 'lodash/debounce';
 import FormulaHandler from '@/utils/formulaUtilsHandler';
@@ -45,6 +44,7 @@ export default class PreviewerBubble {
     this.editor = previewer.editor;
     this.previewerDom = this.previewer.getDom();
     this.enablePreviewerBubble = this.previewer.options.enablePreviewerBubble;
+    this.$cherry = previewer.$cherry;
     /**
      * @property
      * @type {{ [key: string]: HTMLDivElement}}
@@ -86,7 +86,7 @@ export default class PreviewerBubble {
       },
       true,
     );
-    Event.on(this.previewer.instanceId, Event.Events.previewerClose, () => this.$removeAllPreviewerBubbles());
+    this.$cherry.$event.on('previewerClose', () => this.$removeAllPreviewerBubbles());
     this.previewer.options.afterUpdateCallBack.push(() => {
       Object.values(this.bubbleHandler).forEach((handler) =>
         handler.emit('previewUpdate', () => this.$removeAllPreviewerBubbles()),
@@ -235,13 +235,7 @@ export default class PreviewerBubble {
    */
   $onClick(e) {
     const { target } = e;
-    const cherryStatus = this.previewer.$cherry.getStatus();
-    // 纯预览模式下，支持点击放大图片功能（以回调的形式实现，需要业务侧实现图片放大功能）
-    if (cherryStatus.editor === 'hide' || !(target instanceof Element)) {
-      if (cherryStatus.previewer === 'show') {
-        this.previewer.$cherry.options.callback.onClickPreview &&
-          this.previewer.$cherry.options.callback.onClickPreview(e);
-      }
+    if (!(target instanceof Element)) {
       return;
     }
 

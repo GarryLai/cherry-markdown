@@ -56,6 +56,16 @@ const callbacks = {
   afterInit: (text, html) => {},
   beforeImageMounted: (srcProp, src) => ({ srcProp, src }),
   onClickPreview: (event) => {},
+  /**
+   * 粘贴时触发
+   * @param {ClipboardEvent['clipboardData']} clipboardData
+   * @returns
+   *    false: 走cherry粘贴的默认逻辑
+   *    string: 直接粘贴的内容
+   */
+  onPaste: (clipboardData) => {
+    return false;
+  },
   onCopyCode: (event, code) => {
     // 阻止默认的粘贴事件
     // return false;
@@ -97,13 +107,6 @@ const defaultConfig = {
       // false： 一个换行会转成<br>，两个连续换行会分割成段落，三个以上连续换行会转成<br>并分割段落
       classicBr: false,
       /**
-       * 全局的URL处理器
-       * @param {string} url 来源url
-       * @param {'image'|'audio'|'video'|'autolink'|'link'} srcType 来源类型
-       * @returns
-       */
-      urlProcessor: callbacks.urlProcessor,
-      /**
        * 额外允许渲染的html标签
        * 标签以英文竖线分隔，如：htmlWhiteList: 'iframe|script|style'
        * 默认为空，默认允许渲染的html见src/utils/sanitize.js whiteList 属性
@@ -112,6 +115,14 @@ const defaultConfig = {
        *    - 一般编辑权限可控的场景（如api文档系统）可以允许iframe、script等标签
        */
       htmlWhiteList: '',
+      /**
+       * 适配流式会话的场景，开启后将具备以下特性：
+       * 1. 代码块自动闭合，相当于强制 `engine.syntax.codeBlock.selfClosing=true`
+       * 2. 文章末尾的段横线标题语法（`\n-`）失效
+       *
+       * 后续如果有新的需求，可提issue反馈
+       */
+      flowSessionContext: true,
     },
     // 内置语法配置
     syntax: {
@@ -143,6 +154,7 @@ const defaultConfig = {
       },
       table: {
         enableChart: false,
+        selfClosing: false, // 自动闭合，为true时，当输入第一行table内容时，cherry会自动按表格进行解析
         // chartRenderEngine: EChartsTableEngine,
         // externals: ['echarts'],
       },
@@ -192,6 +204,7 @@ const defaultConfig = {
          *           __hello__    ====>   <strong>hello</strong>
          */
         allowWhitespace: false,
+        selfClosing: false, // 自动闭合，为true时，当输入**XXX时，会自动在末尾追加**
       },
       strikethrough: {
         /**
@@ -219,6 +232,8 @@ const defaultConfig = {
       toc: {
         /** 默认只渲染一个目录 */
         allowMultiToc: false,
+        /** 是否显示自增序号 */
+        showAutoNumber: false,
       },
       header: {
         /**
@@ -251,6 +266,8 @@ const defaultConfig = {
     },
     writingStyle: 'normal', // 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal
     keepDocumentScrollAfterInit: false, // 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置
+    showFullWidthMark: true, // 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》
+    showSuggestList: true, // 是否显示联想框
   },
   toolbars: {
     theme: 'dark', // light or dark
@@ -290,13 +307,16 @@ const defaultConfig = {
       'settings',
     ],
     toolbarRight: [],
-    sidebar: [],
+    sidebar: false,
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'table', 'code'], // array or false
     toc: false, // 不展示悬浮目录
     // toc: {
     //   updateLocationHash: false, // 要不要更新URL的hash
     //   defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
+    //   showAutoNumber: false, // 是否显示自增序号
+    //   position: 'absolute', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
+    //   cssText: '', // 自定义样式
     // },
     // 快捷键配置，如果配置为空，则使用toolbar的配置
     shortcutKey: {
@@ -315,8 +335,6 @@ const defaultConfig = {
   },
   // 打开draw.io编辑页的url，如果为空则drawio按钮失效
   drawioIframeUrl: '',
-  // 上传文件的回调
-  fileUpload: callbacks.fileUpload,
   /**
    * 上传文件的时候用来指定文件类型
    */
@@ -329,8 +347,15 @@ const defaultConfig = {
     file: '*',
   },
   callback: {
-    afterChange: callbacks.afterChange,
-    afterInit: callbacks.afterInit,
+    /**
+     * 全局的URL处理器
+     * @param {string} url 来源url
+     * @param {'image'|'audio'|'video'|'autolink'|'link'} srcType 来源类型
+     * @returns
+     */
+    urlProcessor: callbacks.urlProcessor,
+    // 上传文件的回调
+    fileUpload: callbacks.fileUpload,
     beforeImageMounted: callbacks.beforeImageMounted,
     // 预览区域点击事件，previewer.enablePreviewerBubble = true 时生效
     onClickPreview: callbacks.onClickPreview,
@@ -338,6 +363,22 @@ const defaultConfig = {
     onCopyCode: callbacks.onCopyCode,
     // 把中文变成拼音的回调，当然也可以把中文变成英文、英文变成中文
     changeString2Pinyin: callbacks.changeString2Pinyin,
+    /**
+     * 粘贴时触发
+     * @param {ClipboardEvent['clipboardData']} clipboardData
+     * @returns
+     *    false: 走cherry粘贴的默认逻辑
+     *    string: 直接粘贴的内容
+     */
+    onPaste: callbacks.onPaste,
+  },
+  event: {
+    // 当编辑区内容有实际变化时触发
+    afterChange: callbacks.afterChange,
+    afterInit: callbacks.afterInit,
+    focus: ({ e, cherry }) => {},
+    blur: ({ e, cherry }) => {},
+    selectionChange: ({ selections, lastSelections, info }) => {},
   },
   previewer: {
     dom: false,
@@ -399,6 +440,8 @@ const defaultConfig = {
   forceAppend: true,
   // The locale Cherry is going to use. Locales live in /src/locales/
   locale: 'zh_CN',
+  // Supplementary locales
+  locales: {},
   // cherry初始化后是否检查 location.hash 尝试滚动到对应位置
   autoScrollByHashAfterInit: false,
 };

@@ -13,6 +13,7 @@
 - [图片所见即所得编辑尺寸](img.html){target=_blank}
 - [表格所见即所得编辑尺寸](table.html){target=_blank}
 - [标题自动序号](head_num.html){target=_blank}
+- [流式输入模式（AI chart场景）](ai_chat.html){target=_blank}
 
 # Cherry Markdown  { 简明手册 | jiǎn míng shǒu cè }
 
@@ -486,6 +487,44 @@ $$
 |:-:|-:|:-|
 |计算机|￥1600|5|
 |手机机|￥12|50|
+
+-----
+
+## 表格配图
+**说明**
+- 在通用表格语法的基础上，通过在首行首列单元格里写入关键字来同时生成表格和图表
+
+**示例（折线图）**
+```markdown
+| :line:{x,y} | Header1 | Header2 | Header3 | Header4 |
+| ------ | ------ | ------ | ------ | ------ |
+| Sample1 | 11 | 11 | 4 | 33 |
+| Sample2 | 112 | 111 | 22 | 222 |
+| Sample3 | 333 | 142 | 311 | 11 |
+```
+
+**效果**
+| :line:{x,y} | Header1 | Header2 | Header3 | Header4 |
+| ------ | ------ | ------ | ------ | ------ |
+| Sample1 | 11 | 11 | 4 | 33 |
+| Sample2 | 112 | 111 | 22 | 222 |
+| Sample3 | 333 | 142 | 311 | 11 |
+
+**示例（柱状图）**
+```markdown
+| :bar:{y,x} | Header1 | Header2 | Header3 | Header4 |
+| ------ | ------ | ------ | ------ | ------ |
+| Sample1 | 11 | 11 | 4 | 33 |
+| Sample2 | 112 | 111 | 22 | 222 |
+| Sample3 | 333 | 142 | 311 | 11 |
+```
+
+**效果**
+| :bar:{y,x} | Header1 | Header2 | Header3 | Header4 |
+| ------ | ------ | ------ | ------ | ------ |
+| Sample1 | 11 | 11 | 4 | 33 |
+| Sample2 | 112 | 111 | 22 | 222 |
+| Sample3 | 333 | 142 | 311 | 11 |
 
 -----
 

@@ -35,7 +35,6 @@ import htmlParser from '@/utils/htmlparser';
 import pasteHelper from '@/utils/pasteHelper';
 import { addEvent } from './utils/event';
 import Logger from '@/Logger';
-import Event from '@/Event';
 import { handleFileUploadCallback } from '@/utils/file';
 import { createElement } from './utils/dom';
 import { imgBase64Reg, imgDrawioXmlReg } from './utils/regexp';
@@ -66,6 +65,8 @@ export default class Editor {
       wrapperDom: null,
       autoScrollByCursor: true,
       convertWhenPaste: true,
+      showFullWidthMark: true,
+      showSuggestList: true,
       codemirror: {
         lineNumbers: false, // 显示行数
         cursorHeight: 0.85, // 光标高度，0.85好看一些
@@ -103,6 +104,7 @@ export default class Editor {
      * @type {{ timer?: number; destinationTop?: number }}
      */
     this.animation = {};
+    this.selectAll = false;
     const { codemirror, ...restOptions } = options;
     if (codemirror) {
       Object.assign(this.options.codemirror, codemirror);
@@ -163,6 +165,9 @@ export default class Editor {
    * full width翻译为全角
    */
   formatFullWidthMark() {
+    if (!this.options.showFullWidthMark) {
+      return;
+    }
     const { editor } = this;
     const regex = /[·￥、：“”【】（）《》]/; // 此处以仅匹配单个全角符号
     const searcher = editor.getSearchCursor(regex);
@@ -265,15 +270,32 @@ export default class Editor {
    * @returns {boolean | void}
    */
   handlePaste(event, clipboardData, codemirror) {
-    this.pasterHtml = false;
+    const onPasteRet = this.$cherry.options.callback.onPaste(clipboardData);
+    if (onPasteRet !== false && typeof onPasteRet === 'string') {
+      event.preventDefault();
+      codemirror.replaceSelection(onPasteRet);
+      return;
+    }
+    let html = clipboardData.getData('Text/Html');
     const { items } = clipboardData;
-    const types = clipboardData.types || [];
+    // 清空注释
+    html = html.replace(/<!--[^>]+>/g, '');
+    /**
+     * 处理“右键复制图片”场景
+     * 在这种场景下，我们希望粘贴进来的图片可以走文件上传逻辑，所以当检测到这种场景后，我们会清空html
+     */
+    if (
+      /<body>\s*<img [^>]+>\s*<\/body>/.test(html) &&
+      items[1]?.kind === 'file' &&
+      items[1]?.type.match(/^image\//i)
+    ) {
+      html = '';
+    }
     const codemirrorDoc = codemirror.getDoc();
     // HWDES: 此段刪除
 
     // 复制html转换markdown
     const htmlText = clipboardData.getData('text/plain');
-    let html = clipboardData.getData('Text/Html');
     if (!html || !this.options.convertWhenPaste) {
       return true;
     }
@@ -283,7 +305,6 @@ export default class Editor {
     html = divObj.innerHTML;
     const mdText = htmlParser.run(html);
     if (typeof mdText === 'string' && mdText.trim().length > 0) {
-      this.pasterHtml = true;
       const range = codemirror.listSelections();
       if (codemirror.getSelections().length <= 1 && range[0] && range[0].anchor) {
         const currentCursor = {};
@@ -304,7 +325,7 @@ export default class Editor {
    * @param {CodeMirror.Editor} codemirror
    */
   onScroll = (codemirror) => {
-    Event.emit(this.instanceId, Event.Events.cleanAllSubMenus); // 滚动时清除所有子菜单，这不应该在Bubble中处理，我们关注的是编辑器的滚动  add by ufec
+    this.$cherry.$event.emit('cleanAllSubMenus'); // 滚动时清除所有子菜单，这不应该在Bubble中处理，我们关注的是编辑器的滚动  add by ufec
     if (this.disableScrollListener) {
       this.disableScrollListener = false;
       return;
@@ -335,7 +356,7 @@ export default class Editor {
    * @param {MouseEvent} evt
    */
   onMouseDown = (codemirror, evt) => {
-    Event.emit(this.instanceId, Event.Events.cleanAllSubMenus); // Bubble中处理需要考虑太多，直接在编辑器中处理可包括Bubble中所有情况，因为产生Bubble的前提是光标在编辑器中 add by ufec
+    this.$cherry.$event.emit('cleanAllSubMenus'); // Bubble中处理需要考虑太多，直接在编辑器中处理可包括Bubble中所有情况，因为产生Bubble的前提是光标在编辑器中 add by ufec
     const { line: targetLine } = codemirror.getCursor();
     const top = Math.abs(evt.y - codemirror.getWrapperElement().getBoundingClientRect().y);
     this.previewer.scrollToLineNumWithOffset(targetLine + 1, top);
@@ -414,10 +435,12 @@ export default class Editor {
 
     editor.on('blur', (codemirror, evt) => {
       this.options.onBlur(evt, codemirror);
+      this.$cherry.$event.emit('blur', { evt, cherry: this.$cherry });
     });
 
     editor.on('focus', (codemirror, evt) => {
       this.options.onFocus(evt, codemirror);
+      this.$cherry.$event.emit('focus', { evt, cherry: this.$cherry });
     });
 
     editor.on('change', (codemirror, evt) => {
@@ -458,11 +481,11 @@ export default class Editor {
           for (let i = 0; i < files.length; i++) {
             const file = files[i];
             const fileType = file.type || '';
-            // 文本类型或者无类型的，直接读取内容，不做上传文件的操作
-            if (fileType === '' || /^text/i.test(fileType)) {
+            // text格式或md格式文件，直接读取内容，不做上传文件的操作
+            if (/\.(text|md)/.test(file.name) || /^text/i.test(fileType)) {
               continue;
             }
-            this.options.fileUpload(file, (url, params = {}) => {
+            this.$cherry.options.callback.fileUpload(file, (url, params = {}) => {
               if (typeof url !== 'string') {
                 return;
               }
@@ -486,6 +509,9 @@ export default class Editor {
 
     editor.on('cursorActivity', () => {
       this.onCursorActivity();
+    });
+    editor.on('beforeChange', (codemirror) => {
+      this.selectAll = this.editor.getValue() === codemirror.getSelection();
     });
 
     addEvent(

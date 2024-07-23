@@ -26,11 +26,13 @@ export default class Table extends ParagraphBase {
     super({ needCache: true });
     const {
       enableChart,
+      selfClosing,
       chartRenderEngine: ChartRenderEngine,
       externals: requiredPackages,
       chartEngineOptions = {},
     } = config;
     this.chartRenderEngine = null;
+    this.selfClosing = selfClosing;
     if (enableChart === true) {
       try {
         this.chartRenderEngine = new ChartRenderEngine({
@@ -166,11 +168,13 @@ export default class Table extends ParagraphBase {
       return tableResult;
     }
     const chart = this.chartRenderEngine.render(chartOptions.type, chartOptions.options, tableObject);
-    const chartHtml = `<figure id="table_chart_${chartOptionsSign}_${tableResult.sign}"
-      data-sign="table_chart_${chartOptionsSign}_${tableResult.sign}" data-lines="0">${chart}</figure>`;
+    const chartHtml = `<figure class="cherry-table-figure">${chart}</figure>`;
+    const newSign = `${tableResult.sign}${chartOptionsSign}`;
     return {
-      html: `${chartHtml}${tableResult.html}`,
-      sign: chartOptionsSign + tableResult.sign,
+      html: tableResult.html
+        .replace(/(^<div .*?>)/, `$1${chartHtml}`)
+        .replace(/(^<div .*? data-sign=")[^"]+?"/, `$1${newSign}"`),
+      sign: newSign,
     };
   }
 
@@ -221,6 +225,11 @@ export default class Table extends ParagraphBase {
 
   makeHtml(str, sentenceMakeFunc) {
     let $str = str;
+    if (this.$engine.$cherry.options.engine.global.flowSessionContext || this.selfClosing) {
+      if (/(^|^[^|][^\n]*\n|\n\n|\n[^|][^\n]*\n)\s*\|[^\n]+\n{0,1}[|:-\s]*\n*$/.test($str)) {
+        $str = `${$str.replace(/\n[|:-\s]*\n*$/, '')}\n|-|`;
+      }
+    }
     // strict fenced mode
     if (this.test($str, TABLE_STRICT)) {
       $str = $str.replace(this.RULE[TABLE_STRICT].reg, (match, leading) => {

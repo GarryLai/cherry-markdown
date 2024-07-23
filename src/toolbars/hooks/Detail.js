@@ -33,8 +33,7 @@ export default class Detail extends MenuBase {
    */
   onClick(selection) {
     let $selection =
-      getSelection(this.editor.editor, selection, 'line', true) ||
-      '點選展開更多\n內容\n++- 預設展開\n內容\n++ 預設收起\n內容';
+      getSelection(this.editor.editor, selection, 'line', true) || this.$cherry.locale.detailDefaultContent;
     this.detailRule.lastIndex = 0;
     if (!this.detailRule.test($selection)) {
       // 如果没有命中手风琴语法，则尝试扩大选区

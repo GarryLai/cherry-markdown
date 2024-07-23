@@ -34,15 +34,33 @@ export interface CherryOptions {
   /** 定义主题的作用范围，相同themeNameSpace的实例共享主题配置 */
   themeNameSpace: string,
   callback: {
+    /**
+     * 全局的URL处理器，返回值将填充到编辑区域
+     * @param url 来源url
+     * @param srcType 来源类型
+     */
+    urlProcessor?: (url: string, srcType: 'image' | 'audio' | 'video' | 'autolink' | 'link') => string;
+    /** 文件上传回调 */
+    fileUpload?: CherryFileUploadHandler;
     /** 编辑器内容改变并完成渲染后触发 */
-    afterChange: CherryLifecycle;
+    afterChange?: CherryLifecycle;
     /** 编辑器完成初次渲染后触发 */
-    afterInit: CherryLifecycle;
+    afterInit?: CherryLifecycle;
     /** img 标签挂载前触发，可用于懒加载等场景 */
-    beforeImageMounted: (srcProp: string, src: string) => { srcProp: string; src: string };
-    onClickPreview: (e: MouseEvent) => void;
-    onCopyCode: (e: ClipboardEvent, code: string) => string|false;
-    changeString2Pinyin: (str: string) => string;
+    beforeImageMounted?: (srcProp: string, src: string) => { srcProp: string; src: string };
+    onClickPreview?: (e: MouseEvent) => void;
+    onCopyCode?: (e: ClipboardEvent, code: string) => string|false;
+    changeString2Pinyin?: (str: string) => string;
+    onPaste?: (clipboardData: ClipboardEvent['clipboardData']) => string|boolean;
+  };
+  event: {
+    focus?: ({ e: MouseEvent, cherry: Cherry }) => void;
+    blur?: ({ e: MouseEvent, cherry: Cherry }) => void;
+    /** 编辑器内容改变并完成渲染后触发 */
+    afterChange?: CherryLifecycle;
+    /** 编辑器完成初次渲染后触发 */
+    afterInit?: CherryLifecycle;
+    selectionChange?: ({ selections: [], lastSelections: [], info} ) => void;
   };
   /** 预览区域配置 */
   previewer: CherryPreviewerOptions;
@@ -63,6 +81,9 @@ export interface CherryOptions {
   instanceId?: string;
   /** Locale **/
   locale: string;
+  locales: {
+    [locale: string]: Record<string, string>
+  }
 }
 
 export interface CherryExternalsOptions {
@@ -107,6 +128,14 @@ export interface CherryEngineOptions {
      *    - 一般编辑权限可控的场景（如api文档系统）可以允许iframe、script等标签
      */
     htmlWhiteList?: string;
+    /**
+       * 适配流式会话的场景，开启后将具备以下特性：
+       * 1. 代码块自动闭合，相当于强制 `engine.syntax.codeBlock.selfClosing=true`
+       * 2. 文章末尾的段横线标题语法（`\n-`）失效
+       *
+       * 后续如果有新的需求，可提issue反馈
+       */
+    flowSessionContext?: boolean;
   };
   /** 内置语法配置 */
   syntax?: Record<string, Record<string, any> | false>;
@@ -141,9 +170,13 @@ export interface CherryEditorOptions {
   editor?: CodeMirror.Editor;
   /** 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置 */
   keepDocumentScrollAfterInit?: boolean;
+  /** 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》 */
+  showFullWidthMark?: boolean;
+  /** 是否显示联想框 */
+  showSuggestList?: boolean;
 }
 
-export type CherryLifecycle = (text: string, html: string) => void;
+export type CherryLifecycle = (text: String, html: String) => void;
 
 export interface CherryPreviewerOptions {
   dom: HTMLDivElement | false;
@@ -268,6 +301,9 @@ export interface CherryToolbarOptions {
   toc?: false | {
     updateLocationHash: boolean, // 要不要更新URL的hash
     defaultModel: 'pure' | 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
+    showAutoNumber: boolean, // 是否显示自增序号
+    position: 'absolute' | 'fixed', // 悬浮目录的悬浮方式。当滚动条在cherry内部时，用absolute；当滚动条在cherry外部时，用fixed
+    cssText: string, // 额外样式
   };
   /** 是否展示顶部工具栏 */
   showToolbar?: boolean;
@@ -289,7 +325,7 @@ export interface CherryFileUploadHandler {
    * @param file 用户上传的文件对象
    * @param callback 回调函数，接收最终的文件url
    */
-  (file: File, 
+  (file: File,
     /**
      * @param params.name 回填的alt信息
      * @param params.poster 封面图片地址（视频的场景下生效）
